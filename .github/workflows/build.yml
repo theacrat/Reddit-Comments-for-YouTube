@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  my-job:
+    name: my-job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Build Chrome Extension
+        run: bun run zip
+      - name: Upload Chrome Extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcfy-chrome-${{ github.sha }}
+          path: .output/*-chrome.zip
+          include-hidden-files: true
+          if-no-files-found: error
+      - name: Build Firefox Extension
+        run: bun run zip:firefox
+      - name: Upload Firefox Extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcfy-firefox-${{ github.sha }}
+          path: .output/*-firefox.zip
+          include-hidden-files: true
+          if-no-files-found: error
