@@ -46,10 +46,6 @@
 	*::-webkit-scrollbar-thumb {
 		@apply bg-[var(--secondary-text)] rounded-[16px] border-transparent;
 	}
-
-	@media (prefers-color-scheme: dark) {
-		--arrows: url("~/assets/arrows-dark.png");
-	}
 }
 
 @utility plain-button {

@@ -17,8 +17,11 @@
 	--notice-weight: 500;
 	--border-radius-small: 6px;
 	--border-radius-large: 12px;
+}
 
-	@media (prefers-color-scheme: dark) {
+html[dark] {
+	.youtube {
+		--arrows: url("~/assets/arrows-dark.png");
 		--subtle-link-text: var(--secondary-text);
 	}
 }

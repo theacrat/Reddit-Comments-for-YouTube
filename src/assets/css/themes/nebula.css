@@ -1,15 +1,16 @@
+/* stylelint-disable custom-property-pattern */
 .nebula {
 	--primary-text: var(--font-color);
-	--secondary-text: #535556;
-	--link-text: #6fbce6;
+	--secondary-text: var(--label400);
+	--link-text: var(--anchor);
 	--subtle-link-text: var(--link-text);
-	--interactable-background: white;
+	--interactable-background: var(--systemBackground);
 	--select-background: var(--interactable-background);
 	--option-background: var(--interactable-background);
-	--hover-background: #f7f7f7;
-	--interactable-border: #d4d4d5;
+	--hover-background: var(--secondarySystemBackground);
+	--interactable-border: #fff0;
 	--interactable-border-width: 1px;
-	--separator-border: #9999991a;
+	--separator-border: var(--insetStroke);
 	--container-margin: 30px 0;
 	--header-size: 17px;
 	--header-weight: 500;
@@ -18,12 +19,12 @@
 	--border-radius-small: 4px;
 	--border-radius-large: 8px;
 
-	@media (prefers-color-scheme: dark) {
-		--secondary-text: #a1a4a6;
-		--hover-background: #181d1f;
-		--interactable-background: #191f21;
-		--interactable-border: #2e3335;
-		--separator-border: #5555551a;
+	color-scheme: light;
+}
+
+html[data-theme="dark"] {
+	.nebula {
+		--arrows: url("~/assets/arrows-dark.png");
 		--subtle-link-text: var(--secondary-text);
 	}
 }
