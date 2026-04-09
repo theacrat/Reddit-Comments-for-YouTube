@@ -1,3 +1,5 @@
+import { Media } from "./Elements";
+
 export interface YouTubeSearchResponse {
 	contents: {
 		twoColumnSearchResultsRenderer: {
@@ -96,17 +98,7 @@ export interface RedditCommentResponse {
 		locked: boolean;
 		controversiality: number;
 		is_submitter: boolean;
-		media_metadata?: {
-			[mediaId: string]: {
-				e: string;
-				s: {
-					x: number;
-					y: number;
-					u?: string;
-					gif?: string;
-				};
-			};
-		};
+		media_metadata?: Media;
 		replies:
 			| {
 					data: {

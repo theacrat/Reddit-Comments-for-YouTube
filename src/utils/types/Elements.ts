@@ -60,7 +60,7 @@ export interface Reply extends Element {
 export interface Media {
 	[mediaId: string]: {
 		e: string;
-		s: {
+		s?: {
 			x: number;
 			y: number;
 			u?: string;

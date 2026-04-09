@@ -49,6 +49,10 @@ export async function redditCommentParser(content: string, media: Media) {
 		/(?<=^|\s)(\/?u\/([\w-]*))/g,
 		`[$1](${REDDIT_LINK_DOMAIN}/user/$2)`,
 	);
+	content = content.replaceAll(
+		/!\[gif\]\(giphy\|(.*?)\)/g,
+		`[gif](https://giphy.com/gifs/$1)`,
+	);
 
 	content = content.replaceAll(/\^{3,}/g, "^^^");
 	while (content.match(/\^((?:\(.*?\))|(?:\S*))/)) {
@@ -61,7 +65,13 @@ export async function redditCommentParser(content: string, media: Media) {
 
 	for (const [k, v] of Object.entries(media || {})) {
 		const image = v.e === "Image";
+
+		if (!v.s) {
+			continue;
+		}
+
 		const src = (image ? v.s.u : v.s.gif) || "";
+
 		let width = v.s.x;
 		let height = v.s.y;
 
