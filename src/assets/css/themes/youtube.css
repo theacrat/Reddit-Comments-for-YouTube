@@ -1,15 +1,18 @@
+/* stylelint-disable custom-property-pattern */
 .youtube {
-	--primary-text: var(--yt-spec-text-primary);
-	--secondary-text: var(--yt-spec-text-secondary);
-	--link-text: var(--yt-spec-call-to-action);
+	--primary-text: var(--yt-sys-color-baseline--text-primary);
+	--secondary-text: var(--yt-sys-color-baseline--text-secondary);
+	--link-text: var(--yt-sys-color-baseline--call-to-action);
 	--subtle-link-text: var(--link-text);
-	--interactable-background: var(--yt-spec-additive-background);
-	--select-background: var(--yt-spec-base-background);
-	--option-background: var(--yt-spec-additive-background);
-	--hover-background: var(--yt-spec-button-chip-background-hover);
+	--interactable-background: var(--yt-sys-color-baseline--additive-background);
+	--select-background: var(--yt-sys-color-baseline--base-background);
+	--option-background: var(--yt-sys-color-baseline--additive-background);
+	--hover-background: var(
+		--yt-sys-color-baseline--button-chip-background-hover
+	);
 	--interactable-border: #fff0;
 	--interactable-border-width: 0px;
-	--separator-border: var(--yt-spec-outline-opaque);
+	--separator-border: var(--yt-sys-color-baseline--outline-opaque);
 	--container-margin: 20px 0;
 	--header-size: 1.6rem;
 	--header-weight: 400;
