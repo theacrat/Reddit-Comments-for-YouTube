@@ -1,5 +1,9 @@
 # Reddit Comments for YouTube (+ Nebula)
 
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/jkindjececcjpkladckbgblgblocgoep?style=flat-square&logo=googlechrome&logoColor=white&color=%234285F4)](https://chromewebstore.google.com/detail/linkfxer/jkindjececcjpkladckbgblgblocgoep)
+[![Mozilla Add-on Version](https://img.shields.io/amo/v/rcfy?style=flat-square&logo=firefoxbrowser&logoColor=white&color=%23FF7139)
+](https://addons.mozilla.org/addon/rcfy/)
+
 An extension to display Reddit (and Lemmy) threads for YouTube and Nebula videos. You can also view threads for any URL through the popup!
 
 This is loosely based on [Lucien Maloney's extension](https://github.com/lucienmaloney/reddit_comments_for_youtube_extension) (it was once a fork, but has since been totally rewritten thrice).
@@ -72,7 +76,7 @@ bun run zip:firefox
 ![Screenshot of thread selector (dark mode)](https://files.catbox.moe/g41iut.png)
 ![Screenshot of popup](https://files.catbox.moe/bpdjt6.png)
 
-## License
+## Licence
 
 Reddit Comments for YouTube
 
