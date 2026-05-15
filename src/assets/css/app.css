@@ -1,0 +1,49 @@
+@reference "./threads.css";
+
+.reddit-comment * {
+	@apply my-[5px] wrap-break-word;
+}
+
+.reddit-comment a,
+.reddit-comment button {
+	@apply plain-button;
+}
+
+.reddit-comment a,
+.reddit-comment button:not([data-reddit-spoiler-button]) {
+	@apply text-link;
+}
+
+.reddit-comment button[data-reddit-spoiler-button] {
+	@apply bg-(--subtle-link-text) *:pointer-events-none *:opacity-0;
+}
+
+.reddit-comment blockquote {
+	@apply text-secondary border-l-separator ml-[5px] border-0 border-l-2 border-solid px-2;
+}
+
+.reddit-comment img {
+	@apply my-0 h-auto max-h-[200px] min-w-[20px] object-cover;
+}
+
+.reddit-comment pre {
+	@apply bg-interactable rounded-sm [border-width:var(--interactable-border-width)] border-(--interactable-border) px-[9px] py-1;
+}
+
+.reddit-comment ol,
+.reddit-comment ul {
+	@apply pl-10;
+}
+
+.reddit-comment table {
+	@apply border-collapse;
+}
+
+.reddit-comment th,
+.reddit-comment td {
+	@apply border-blockquote border p-[5px];
+}
+
+.reddit-comment code {
+	@apply mx-0.5 inline-block w-full overflow-x-auto leading-5 break-normal;
+}

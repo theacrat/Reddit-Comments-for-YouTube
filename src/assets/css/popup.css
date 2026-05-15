@@ -1,0 +1,10 @@
+@reference "./threads.css";
+
+body {
+	@apply m-0 flex justify-center overflow-hidden;
+}
+
+input[type="text"],
+input[type="password"] {
+	@apply grow rounded-lg border-transparent py-2 text-[1em];
+}

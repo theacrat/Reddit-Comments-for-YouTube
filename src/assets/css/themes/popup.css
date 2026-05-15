@@ -1,0 +1,27 @@
+/* stylelint-disable custom-property-pattern */
+[data-theme="popup"] {
+	--primary-text: white;
+	--secondary-text: #aaa;
+	--link-text: #3ea6ff;
+	--subtle-link-text: var(--secondary-text);
+	--interactable-background: rgb(255 255 255 / 10%);
+	--select-background: #242424;
+	--option-background: rgb(255 255 255 / 10%);
+	--hover-background: rgb(255 255 255 / 20%);
+	--interactable-border: #fff0;
+	--interactable-border-width: 0px;
+	--separator-border: rgb(255 255 255 / 20%);
+	--container-margin: 20px 0;
+	--header-size: 14px;
+	--header-weight: 400;
+	--notice-size: 12px;
+	--notice-weight: 500;
+	--border-radius-small: 6px;
+	--border-radius-large: 12px;
+	--arrows: url("~/assets/arrows-dark.png");
+
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	color-scheme: dark;
+
+	@apply text-primary bg-[#242424];
+}

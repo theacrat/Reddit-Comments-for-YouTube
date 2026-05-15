@@ -1,0 +1,6 @@
+@import "./threads.css";
+@import "./app.css";
+
+body {
+	@apply m-0;
+}

@@ -1,0 +1,58 @@
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./themes/youtube.css";
+@import "./themes/nebula.css";
+@import "./themes/popup.css";
+
+@theme inline {
+	--color-primary: var(--primary-text);
+	--color-secondary: var(--secondary-text);
+	--color-link: var(--link-text);
+	--color-subtle: var(--subtle-link-text);
+	--color-interactable: var(--interactable-background);
+	--color-select: var(--select-background);
+	--color-option: var(--option-background);
+	--color-hover: var(--hover-background);
+	--color-separator: var(--separator-border);
+	--color-blockquote: var(--secondary-text);
+	--background-image-arrows: var(--arrows);
+	--text-header: var(--header-size);
+	--font-weight-header: var(--header-weight);
+	--text-standard: var(--notice-size);
+	--text-arrow: calc(var(--notice-size) / 2);
+	--font-weight-notice: var(--notice-weight);
+	--margin-container: var(--container-margin);
+	--radius-small: var(--border-radius-small);
+	--radius-large: var(--border-radius-large);
+}
+
+@utility reddit-comments {
+	--arrows: url("~/assets/arrows-light.png");
+
+	*::-webkit-scrollbar {
+		@apply bg-option h-[8px] w-[8px];
+	}
+
+	*::-webkit-scrollbar-track {
+		@apply bg-transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		@apply rounded-[16px] border-transparent bg-(--secondary-text);
+	}
+}
+
+@utility plain-button {
+	@apply m-0 cursor-pointer border-0 bg-transparent bg-none p-0 text-left text-inherit no-underline;
+
+	border: unset;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+
+	&:disabled {
+		@apply cursor-default;
+	}
+}

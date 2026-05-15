@@ -1,0 +1,28 @@
+/* stylelint-disable custom-property-pattern */
+[data-theme="nebula"] {
+	--primary-text: var(--font-color);
+	--secondary-text: var(--label400);
+	--link-text: var(--anchor);
+	--subtle-link-text: var(--link-text);
+	--interactable-background: var(--systemBackground);
+	--select-background: var(--interactable-background);
+	--option-background: var(--interactable-background);
+	--hover-background: var(--secondarySystemBackground);
+	--interactable-border: #fff0;
+	--interactable-border-width: 1px;
+	--separator-border: var(--insetStroke);
+	--container-margin: 30px 0;
+	--header-size: 17px;
+	--header-weight: 500;
+	--notice-size: 14px;
+	--notice-weight: 500;
+	--border-radius-small: 4px;
+	--border-radius-large: 8px;
+
+	color-scheme: light;
+}
+
+:host([data-dark]) [data-theme="nebula"] {
+	--arrows: url("~/assets/arrows-dark.png");
+	--subtle-link-text: var(--secondary-text);
+}

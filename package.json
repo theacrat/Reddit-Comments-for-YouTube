@@ -1,0 +1,73 @@
+{
+	"name": "reddit-comments-for-youtube",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Improve your YouTube (and Nebula) experience by adding a Reddit comment section to the site!",
+	"type": "module",
+	"scripts": {
+		"build": "wxt build",
+		"build:firefox": "wxt build -b firefox --mv3",
+		"compile": "tsc --noEmit",
+		"dev": "wxt",
+		"dev:firefox": "wxt -b firefox --mv3",
+		"format": "oxfmt --write",
+		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
+		"lint:style": "stylelint --fix",
+		"postinstall": "wxt prepare",
+		"prepare": "husky",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"test:watch": "vitest",
+		"zip": "wxt zip",
+		"zip:firefox": "wxt zip -b firefox --mv3"
+	},
+	"dependencies": {
+		"@webext-core/messaging": "^2.2.0",
+		"@wxt-dev/i18n": "^0.2.3",
+		"axios": "^1.16.0",
+		"fast-fuzzy": "^1.12.0",
+		"lucide-react": "^1.3.0",
+		"markdown-it": "^14.1.1",
+		"react": "^19.2.5",
+		"react-aria-components": "^1.17.0",
+		"react-dom": "^19.2.5",
+		"tailwind-variants": "^3.2.2",
+		"tailwindcss": "^4.2.4",
+		"youtube-search-api": "^2.0.1",
+		"zod": "^4.4.2",
+		"zustand": "^5.0.12"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^21.0.1",
+		"@commitlint/config-conventional": "^21.0.1",
+		"@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
+		"@tailwindcss/vite": "^4.2.4",
+		"@tsconfig/recommended": "^1.0.13",
+		"@tsconfig/strictest": "^2.0.8",
+		"@tsconfig/vite-react": "^7.0.2",
+		"@types/markdown-it": "^14.1.2",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitest/coverage-v8": "^4.1.6",
+		"@wxt-dev/auto-icons": "^1.1.1",
+		"@wxt-dev/module-react": "^1.2.2",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0",
+		"oxfmt": "^0.46.0",
+		"oxlint": "^1.61.0",
+		"oxlint-tsgolint": "^0.21.1",
+		"stylelint": "^17.9.0",
+		"stylelint-config-clean-order": "^8.0.1",
+		"stylelint-config-standard": "^40.0.0",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.6",
+		"wxt": "^0.20.25"
+	},
+	"lint-staged": {
+		"*": [
+			"bun run lint --no-error-on-unmatched-pattern",
+			"bun run lint:style",
+			"bun run format"
+		]
+	}
+}

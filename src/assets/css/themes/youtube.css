@@ -1,0 +1,28 @@
+/* stylelint-disable custom-property-pattern */
+[data-theme="youtube"] {
+	--primary-text: var(--yt-sys-color-baseline--text-primary);
+	--secondary-text: var(--yt-sys-color-baseline--text-secondary);
+	--link-text: var(--yt-sys-color-baseline--call-to-action);
+	--subtle-link-text: var(--link-text);
+	--interactable-background: var(--yt-sys-color-baseline--additive-background);
+	--select-background: var(--yt-sys-color-baseline--base-background);
+	--option-background: var(--yt-sys-color-baseline--additive-background);
+	--hover-background: var(
+		--yt-sys-color-baseline--button-chip-background-hover
+	);
+	--interactable-border: #fff0;
+	--interactable-border-width: 0px;
+	--separator-border: var(--yt-sys-color-baseline--outline-opaque);
+	--container-margin: 20px 0;
+	--header-size: 1.6rem;
+	--header-weight: 400;
+	--notice-size: 1.4rem;
+	--notice-weight: 500;
+	--border-radius-small: 6px;
+	--border-radius-large: 12px;
+}
+
+:host([data-dark]) [data-theme="youtube"] {
+	--arrows: url("~/assets/arrows-dark.png");
+	--subtle-link-text: var(--secondary-text);
+}

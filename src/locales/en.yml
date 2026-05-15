@@ -1,0 +1,119 @@
+extensionName: Reddit Comments for YouTube (+ Nebula)
+extensionDescription: Improve your YouTube (and Nebula) experience by adding a Reddit comment section to the site!
+header: External Comments
+loadingThreads: Loading threads...
+popupButtons:
+  add: Add
+  set: Set
+threadSort: "Sort: "
+threadSortOptions:
+  score: Score
+  comments: Comments
+  community: Community
+  newest: Newest
+loadingComments: Loading comments...
+noThreads: No threads found.
+threadCount:
+  1: 1 thread
+  n: $1 threads
+error: Error
+internetError: Internet connection error. Please check your connection and reload the page.
+otherError: Unknown error loading Reddit content. It is possible that Reddit is down or something in the extension went wrong.
+threadError: Couldn't get threads.
+tagline:
+  submitted: submitted
+  by: by
+  to: to
+  moreAwards: "& $1 more"
+  stickiedComment: " - stickied comment"
+  commentPoints:
+    1: 1 point
+    n: $1 points
+  commentThousandUnit: $1k
+  commentScoreHidden: "[score hidden]"
+  commentEdited: "last edited $1"
+commentButtons:
+  permalink: permalink
+  edit: edit
+  editFailed: failed to edit
+  delete: delete
+  confirmDelete: are you sure?
+  "yes": "yes"
+  "no": "no"
+  deleted: deleted
+  reply: reply
+  childComments:
+    hide: hide child comments
+    show: show child comments
+loadMoreComments: load more comments
+moreCount: ($1 more)
+continueThread: continue this thread →
+loadingMoreComments: loading...
+save: save
+cancel: cancel
+submitting: submitting...
+sortedBy: "sorted by:"
+redditCommentSortOptions:
+  best: best
+  hot: hot
+  top: top
+  new: new
+  controversial: controversial
+  old: old
+  qa: q&a
+lemmyCommentSortOptions:
+  Hot: Hot
+  Top: Top
+  New: New
+time:
+  justNow: just now
+  seconds: $1 seconds ago
+  minutes:
+    1: 1 minute ago
+    n: $1 minutes ago
+  hours:
+    1: 1 hour ago
+    n: $1 hours ago
+  days:
+    1: 1 day ago
+    n: $1 days ago
+  months:
+    1: 1 month ago
+    n: $1 months ago
+  years:
+    1: 1 year ago
+    n: $1 years ago
+settings:
+  enableYouTube: Show on YouTube.
+  enableNebula: Show on Nebula.
+  matchToYouTube: Try to match Nebula videos to YouTube (may return false positives).
+  collapseOnLoad: Collapse comments by default.
+  childrenHiddenDefault: Auto-hide children for top-level comments.
+  includeNSFW: Include NSFW threads while logged out.
+  defaultSort: "Default comment sort: "
+  defaultSortLemmy: "Default comment sort (Lemmy): "
+  lastSort: "Last comment sort: "
+  communityBlacklist: "Blacklist communities: "
+  lemmyDomain: "Lemmy domain: "
+  lemmyToken: "Lemmy token: "
+  lemmyUsername: "Lemmy username: "
+  showRedditResults: Show Reddit results when Lemmy domain is set.
+  searchAllSites: Enable threads on all sites through this popup.
+duplicateEntry: Duplicate entry, ignored.
+invalidSubreddit: Must be at least 3 letters, numbers, and underscores.
+instance: Instance (blank to disable)
+username: Username
+password: Password
+twoFactorAuth: 2FA (Optional)
+login: Login
+logout: Logout
+loggedIn: Logged in as $1
+loginToLemmy: Login to Lemmy
+popupTabs:
+  settings: Go to Settings >
+  threads: Go to Threads >
+tabsExplanation: This function requires the tabs permission to get the URL of each page. Grant the permission, and refresh the page.
+request: Request...
+vote:
+  1: Upvote
+  -1: Downvote
