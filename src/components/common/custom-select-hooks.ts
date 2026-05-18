@@ -1,6 +1,12 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 import type { SelectOption } from "@/utils/types/elements";
+
+interface RootScrollStyles {
+	overflow: string;
+	paddingRight: string;
+	scrollbarGutter: string;
+}
 
 function createMeasureNode(buttonStyles: CSSStyleDeclaration) {
 	const measure = document.createElement("span");
@@ -71,6 +77,28 @@ function getMeasuredButtonWidth({
 	return Math.ceil(
 		arrowWidth + borderWidth + gap + horizontalPadding + textWidth,
 	);
+}
+
+function getRootScrollStyles(): RootScrollStyles {
+	const { style } = document.documentElement;
+
+	return {
+		overflow: style.overflow,
+		paddingRight: style.paddingRight,
+		scrollbarGutter: style.scrollbarGutter,
+	};
+}
+
+function isInShadowRoot(element: Element) {
+	return element.getRootNode() instanceof ShadowRoot;
+}
+
+function restoreRootScrollStyles(styles: RootScrollStyles) {
+	const { style } = document.documentElement;
+
+	style.overflow = styles.overflow;
+	style.paddingRight = styles.paddingRight;
+	style.scrollbarGutter = styles.scrollbarGutter;
 }
 
 type UseInitialButtonWidthParams = UseButtonWidthParams;
@@ -146,4 +174,49 @@ function useButtonWidth(params: UseButtonWidthParams) {
 	useObservedButtonWidth(params);
 }
 
-export { useButtonWidth };
+interface UseShadowRootSelectScrollStylesParams {
+	buttonRef: React.RefObject<HTMLButtonElement | undefined>;
+	isOpen: boolean;
+}
+
+function useShadowRootSelectScrollStyles({
+	buttonRef,
+	isOpen,
+}: UseShadowRootSelectScrollStylesParams) {
+	const closedStylesRef = useRef<RootScrollStyles | undefined>(undefined);
+
+	useLayoutEffect(() => {
+		const button = buttonRef.current;
+
+		if (!button || !isInShadowRoot(button)) {
+			return;
+		}
+
+		if (!isOpen) {
+			closedStylesRef.current = getRootScrollStyles();
+			return;
+		}
+
+		const styles = closedStylesRef.current;
+
+		if (!styles) {
+			return;
+		}
+
+		const restore = () => {
+			restoreRootScrollStyles(styles);
+		};
+
+		restore();
+
+		const frame = requestAnimationFrame(restore);
+		const timeout = setTimeout(restore, 0);
+
+		return () => {
+			cancelAnimationFrame(frame);
+			clearTimeout(timeout);
+		};
+	}, [buttonRef, isOpen]);
+}
+
+export { useButtonWidth, useShadowRootSelectScrollStyles };

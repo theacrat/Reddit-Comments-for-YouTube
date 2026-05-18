@@ -16,7 +16,10 @@ import type { Key, PopoverRenderProps } from "react-aria-components";
 import { customSelect as customSelectStyles } from "@/components/common/variants/select-variants";
 import type { SelectOption } from "@/utils/types/elements";
 
-import { useButtonWidth } from "./custom-select-hooks";
+import {
+	useButtonWidth,
+	useShadowRootSelectScrollStyles,
+} from "./custom-select-hooks";
 
 type PopoverClassNameParams = Exclude<
 	Exclude<ComponentProps<typeof Popover>["className"], string>,
@@ -166,8 +169,11 @@ interface SelectContentProps<T extends Key> {
 }
 
 function SelectContent<T extends Key>(props: SelectContentProps<T>) {
-	const { customSelectProps, labelClassName } = props;
+	const { customSelect, customSelectProps, isOpen, labelClassName } = props;
+	const { buttonRef } = customSelect;
 	const { label } = customSelectProps;
+
+	useShadowRootSelectScrollStyles({ buttonRef, isOpen });
 
 	return (
 		<>
@@ -226,6 +232,7 @@ function useCustomSelect<T extends Key>({
 	);
 
 	return {
+		buttonRef,
 		handleSelectChange,
 		measuredStyle,
 		placement,
