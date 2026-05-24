@@ -119,7 +119,7 @@ function renderTimestampToken(token: Token | undefined) {
 	const text = token?.content ?? "";
 	const seconds = getTokenSeconds(token);
 
-	return `<button type="button" data-timestamp-seconds="${seconds}">[${escapeHtml(text)}]</button>`;
+	return `<span role="button" tabindex="0" data-timestamp-seconds="${seconds}">[${escapeHtml(text)}]</span>`;
 }
 
 export { makeTimestampToken, parseTimestampToken, renderTimestampToken };

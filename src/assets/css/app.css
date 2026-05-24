@@ -5,17 +5,17 @@
 }
 
 .reddit-comment a,
-.reddit-comment button {
+.reddit-comment span[role="button"] {
 	@apply plain-button;
 }
 
 .reddit-comment a,
-.reddit-comment button:not([data-reddit-spoiler-button]) {
+.reddit-comment span[role="button"]:not([data-reddit-spoiler-button]) {
 	@apply text-link;
 }
 
-.reddit-comment button[data-reddit-spoiler-button] {
-	@apply bg-(--subtle-link-text) *:pointer-events-none *:opacity-0;
+.reddit-comment span[data-reddit-spoiler-button] {
+	@apply cursor-pointer bg-(--subtle-link-text) *:pointer-events-none *:opacity-0;
 }
 
 .reddit-comment blockquote {

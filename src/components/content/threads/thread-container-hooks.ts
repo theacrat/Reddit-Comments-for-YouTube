@@ -40,6 +40,7 @@ function useTimestampListener(site: Site) {
 			);
 
 			if (videoElement) {
+				videoElement.focus();
 				videoElement.currentTime = detail.time;
 			}
 		}

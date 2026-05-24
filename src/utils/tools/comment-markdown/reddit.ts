@@ -274,7 +274,7 @@ function redditMarkdownPlugin(md: MarkdownIt) {
 		const content = tokens[index]?.content ?? "";
 		const renderedContent = md.renderInline(content, env);
 
-		return `<button type="button" data-reddit-spoiler-button><span>${renderedContent}</span></button>`;
+		return `<span role="button" tabindex="0" data-reddit-spoiler-button><span>${renderedContent}</span></span>`;
 	};
 
 	md.renderer.rules["comment_timestamp"] = (tokens, index) =>

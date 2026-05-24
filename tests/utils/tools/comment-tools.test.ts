@@ -72,7 +72,7 @@ describe("redditCommentParser Reddit spoiler markdown", () => {
 
 		expect(html).toContain("Careful ");
 		expect(html).toContain(
-			'<button type="button" data-reddit-spoiler-button><span>hidden text</span></button>',
+			'<span role="button" tabindex="0" data-reddit-spoiler-button><span>hidden text</span></span>',
 		);
 	});
 
@@ -80,7 +80,7 @@ describe("redditCommentParser Reddit spoiler markdown", () => {
 		const html = renderRedditComment("&gt;!hidden line!&lt;");
 
 		expect(html).toBe(
-			'<p><button type="button" data-reddit-spoiler-button><span>hidden line</span></button></p>\n',
+			'<p><span role="button" tabindex="0" data-reddit-spoiler-button><span>hidden line</span></span></p>\n',
 		);
 	});
 
@@ -229,10 +229,10 @@ describe("redditCommentParser Reddit renderer fixes", () => {
 		const html = renderRedditComment("watch 1:02 or 2m03s");
 
 		expect(html).toContain(
-			'<button type="button" data-timestamp-seconds="62">[1:02]</button>',
+			'<span role="button" tabindex="0" data-timestamp-seconds="62">[1:02]</span>',
 		);
 		expect(html).toContain(
-			'<button type="button" data-timestamp-seconds="123">[2m03s]</button>',
+			'<span role="button" tabindex="0" data-timestamp-seconds="123">[2m03s]</span>',
 		);
 	});
 });
@@ -358,10 +358,10 @@ describe("lemmyCommentParser renderer behavior", () => {
 		const html = await renderLemmyComment("watch 1:02 or 2m03s");
 
 		expect(html).toContain(
-			'<button type="button" data-timestamp-seconds="62">[1:02]</button>',
+			'<span role="button" tabindex="0" data-timestamp-seconds="62">[1:02]</span>',
 		);
 		expect(html).toContain(
-			'<button type="button" data-timestamp-seconds="123">[2m03s]</button>',
+			'<span role="button" tabindex="0" data-timestamp-seconds="123">[2m03s]</span>',
 		);
 	});
 
