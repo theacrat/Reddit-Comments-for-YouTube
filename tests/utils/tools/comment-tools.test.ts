@@ -104,6 +104,16 @@ describe("redditCommentParser Reddit superscript markdown", () => {
 		expect(html).toBe("<p>a<sup>whole phrase</sup> example</p>\n");
 	});
 
+	it("renders links as superscript when the link label is superscript", () => {
+		const html = renderRedditComment(
+			"[^(superscript link label)](https://example.com)",
+		);
+
+		expect(html).toBe(
+			'<p><a href="https://example.com" target="_blank"><sup>superscript link label</sup></a></p>\n',
+		);
+	});
+
 	it("renders repeated carets as nested superscript levels", () => {
 		const html = renderRedditComment("tiny ^^^^word");
 

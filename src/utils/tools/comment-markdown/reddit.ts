@@ -205,12 +205,15 @@ function superscriptRule(state: StateInline, silent: boolean) {
 			state.push("sup_open", "sup", 1);
 		}
 
+		const contentTokens: Token[] = [];
+
 		state.md.inline.parse(
 			superscript.content,
 			state.md,
 			state.env,
-			state.tokens,
+			contentTokens,
 		);
+		state.tokens.push(...contentTokens);
 
 		for (let index = 0; index < superscript.level; index += 1) {
 			state.push("sup_close", "sup", -1);
