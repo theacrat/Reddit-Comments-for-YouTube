@@ -24,12 +24,14 @@ export default defineContentScript({
 
 		const state: ContentState = {
 			currentRoot: undefined,
+			isEditableHostSynced: false,
 			lastVideoId: undefined,
 			shadowUi: undefined,
 		};
 
 		state.shadowUi = await createShadowRootUi(ctx, {
 			css: contentCss,
+			isolateEvents: true,
 			name: "rcfy-root",
 			onMount(uiContainer) {
 				const root = createThreadRoot(uiContainer);

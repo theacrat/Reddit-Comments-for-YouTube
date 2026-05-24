@@ -10,6 +10,7 @@ import { renderSelector } from "./render";
 
 interface ContentState {
 	currentRoot: Root | undefined;
+	isEditableHostSynced: boolean;
 	lastVideoId: string | undefined;
 	shadowUi: ShadowRootContentScriptUi<Root> | undefined;
 }
@@ -43,6 +44,45 @@ async function searchYouTube({
 }
 
 type SyncHostAppearanceParams = InsertUiParams;
+
+function isTextEntryElement(target: EventTarget | null | undefined) {
+	return (
+		target instanceof HTMLInputElement ||
+		target instanceof HTMLTextAreaElement ||
+		(target instanceof HTMLElement && target.isContentEditable)
+	);
+}
+
+function relatedFocusTarget(event: Event) {
+	return event instanceof FocusEvent ? event.relatedTarget : undefined;
+}
+
+function syncEditableHost(shadowUi: ShadowRootContentScriptUi<Root>) {
+	const { shadow, shadowHost } = shadowUi;
+
+	shadowHost.contentEditable = "false";
+
+	shadow.addEventListener("focusin", (event) => {
+		if (isTextEntryElement(event.target)) {
+			shadowHost.contentEditable = "true";
+		}
+	});
+
+	shadow.addEventListener("focusout", (event) => {
+		shadowHost.contentEditable = isTextEntryElement(relatedFocusTarget(event))
+			? "true"
+			: "false";
+	});
+}
+
+function syncEditableHostOnce(state: ContentState) {
+	if (!state.shadowUi || state.isEditableHostSynced) {
+		return;
+	}
+
+	syncEditableHost(state.shadowUi);
+	state.isEditableHostSynced = true;
+}
 
 function syncHostAppearance({
 	anchorElement,
@@ -173,6 +213,8 @@ async function setup({ site, state }: SetupParams) {
 	if (!state.shadowUi) {
 		return;
 	}
+
+	syncEditableHostOnce(state);
 
 	if (!state.shadowUi.shadowHost.isConnected) {
 		state.shadowUi.mount();

@@ -18,11 +18,6 @@ const textAreaClassName = styles.textArea();
 
 const footerButtonStyle = { fontSize: "revert" } as const;
 
-function stopHostKeyboardShortcut(event: KeyboardEvent<HTMLTextAreaElement>) {
-	event.stopPropagation();
-	event.nativeEvent.stopImmediatePropagation();
-}
-
 interface SaveCommentParams {
 	setErrorMessage: Dispatch<SetStateAction<string>>;
 	setTextAreaValue: Dispatch<SetStateAction<string>>;
@@ -153,8 +148,6 @@ function useTextBox(params: UseTextBoxParams) {
 	};
 
 	const handleCtrlEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-		stopHostKeyboardShortcut(event);
-
 		if (event.ctrlKey && event.key === "Enter") {
 			event.preventDefault();
 
@@ -197,7 +190,6 @@ function TextBox(props: TextBoxProps) {
 				className={textAreaClassName}
 				onChange={handleTextChange}
 				onKeyDown={handleCtrlEnter}
-				onKeyUp={stopHostKeyboardShortcut}
 				value={textAreaValue}
 			/>
 			<TextBoxFooter textBox={textBox} textBoxProps={props} />
