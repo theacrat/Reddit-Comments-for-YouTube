@@ -19,6 +19,7 @@ export default defineConfig({
 		optional_permissions: ["tabs"],
 		permissions: ["storage"],
 	},
+	manifestVersion: 3,
 	modules: [
 		"@wxt-dev/auto-icons",
 		"@wxt-dev/i18n/module",

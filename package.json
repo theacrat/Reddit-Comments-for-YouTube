@@ -6,10 +6,10 @@
 	"type": "module",
 	"scripts": {
 		"build": "wxt build",
-		"build:firefox": "wxt build -b firefox --mv3",
+		"build:firefox": "wxt build -b firefox",
 		"compile": "tsc --noEmit",
 		"dev": "wxt",
-		"dev:firefox": "wxt -b firefox --mv3",
+		"dev:firefox": "wxt -b firefox",
 		"format": "oxfmt --write",
 		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
 		"lint:style": "stylelint --fix",
@@ -19,7 +19,7 @@
 		"test:coverage": "vitest run --coverage",
 		"test:watch": "vitest",
 		"zip": "wxt zip",
-		"zip:firefox": "wxt zip -b firefox --mv3"
+		"zip:firefox": "wxt zip -b firefox"
 	},
 	"dependencies": {
 		"@webext-core/messaging": "^2.2.0",
