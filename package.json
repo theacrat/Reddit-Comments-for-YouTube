@@ -12,7 +12,9 @@
 		"dev:firefox": "wxt -b firefox",
 		"format": "oxfmt --write",
 		"lint": "oxlint --type-aware --type-check --fix --fix-suggestions",
+		"lint:ci": "oxlint --type-aware --type-check --format=github",
 		"lint:style": "stylelint --fix",
+		"lint:style:ci": "stylelint --custom-formatter @csstools/stylelint-formatter-github .",
 		"postinstall": "wxt prepare",
 		"prepare": "husky",
 		"test": "vitest run",
@@ -40,6 +42,7 @@
 	"devDependencies": {
 		"@commitlint/cli": "^21.0.1",
 		"@commitlint/config-conventional": "^21.0.1",
+		"@csstools/stylelint-formatter-github": "^2.0.0",
 		"@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
 		"@tailwindcss/vite": "^4.2.4",
 		"@tsconfig/recommended": "^1.0.13",

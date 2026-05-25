@@ -1,0 +1,150 @@
+name: Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit_chrome:
+        default: true
+        description: Submit to the Chrome Web Store
+        required: true
+        type: boolean
+      submit_firefox:
+        default: true
+        description: Submit to the Firefox Add-on Store
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release tag
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(gh release view --json tagName --jq .tagName)"
+
+          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            echo "::error::No release tag found"
+            exit 1
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Validate submission targets
+        env:
+          SUBMIT_CHROME: ${{ inputs.submit_chrome }}
+          SUBMIT_FIREFOX: ${{ inputs.submit_firefox }}
+        run: |
+          if [ "$SUBMIT_CHROME" != "true" ] && [ "$SUBMIT_FIREFOX" != "true" ]; then
+            echo "::error::At least one store submission target must be selected"
+            exit 1
+          fi
+
+  submit-chrome:
+    if: inputs.submit_chrome
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout release tag
+        run: git checkout --detach "${{ needs.prepare.outputs.tag }}"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download Chrome artefact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release-assets
+          gh release download "${{ needs.prepare.outputs.tag }}" --dir release-assets --pattern "*-chrome.zip"
+
+      - name: Get Chrome artefact
+        id: chrome_artefact
+        run: |
+          mapfile -t files < <(find release-assets -maxdepth 1 -type f -name "*-chrome.zip" | sort)
+
+          if [ "${#files[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one Chrome ZIP, found ${#files[@]}"
+            printf '%s\n' "${files[@]}"
+            exit 1
+          fi
+
+          echo "zip=${files[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Submit to Chrome Web Store
+        env:
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: |
+          bun run wxt submit \
+            --chrome-zip ${{ steps.chrome_artefact.outputs.zip }}
+
+  submit-firefox:
+    if: inputs.submit_firefox
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout release tag
+        run: git checkout --detach "${{ needs.prepare.outputs.tag }}"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download Firefox artefacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release-assets
+          gh release download "${{ needs.prepare.outputs.tag }}" --dir release-assets --pattern "*-firefox.zip"
+          gh release download "${{ needs.prepare.outputs.tag }}" --dir release-assets --pattern "*-sources.zip"
+
+      - name: Get Firefox artefacts
+        id: firefox_artefacts
+        run: |
+          get_zip() {
+            local name="$1"
+            local pattern="$2"
+            mapfile -t files < <(find release-assets -maxdepth 1 -type f -name "$pattern" | sort)
+
+            if [ "${#files[@]}" -ne 1 ]; then
+              echo "::error::Expected exactly one $name ZIP, found ${#files[@]}"
+              printf '%s\n' "${files[@]}"
+              exit 1
+            fi
+
+            echo "$name=${files[0]}" >> "$GITHUB_OUTPUT"
+          }
+
+          get_zip "firefox_zip" "*-firefox.zip"
+          get_zip "sources_zip" "*-sources.zip"
+
+      - name: Submit to Firefox Addon Store
+        env:
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+        run: |
+          bun run wxt submit \
+            --firefox-zip ${{ steps.firefox_artefacts.outputs.firefox_zip }} \
+            --firefox-sources-zip ${{ steps.firefox_artefacts.outputs.sources_zip }}
