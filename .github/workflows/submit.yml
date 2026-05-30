@@ -28,7 +28,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="$(gh release view --json tagName --jq .tagName)"
+          tag="$(gh release view --json tagName --jq .tagName --repo "$GITHUB_REPOSITORY")"
 
           if [ -z "$tag" ] || [ "$tag" = "null" ]; then
             echo "::error::No release tag found"
