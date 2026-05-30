@@ -228,7 +228,7 @@ function getRedditMedia(token: Token | undefined, env: unknown) {
 	const alt = token.content;
 
 	if (alt === "gif" && src.startsWith("giphy|")) {
-		const giphyId = src.slice("giphy|".length);
+		const [giphyId] = src.slice("giphy|".length).split("|");
 		const giphySrc = `https://i.giphy.com/${giphyId}.gif`;
 
 		return {

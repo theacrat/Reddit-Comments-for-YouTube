@@ -246,6 +246,14 @@ describe("redditCommentParser Reddit media markdown", () => {
 		);
 	});
 
+	it("renders Reddit's Giphy image markdown with a trailing format segment", () => {
+		const html = renderRedditComment("![gif](giphy|abc123|downsized)");
+
+		expect(html).toBe(
+			'<p><a href="https://giphy.com/gifs/abc123" target="_blank"><img src="https://i.giphy.com/abc123.gif" alt="Comment Image" loading="lazy"></a></p>\n',
+		);
+	});
+
 	it("renders a bare Reddit image URL from matching media metadata", () => {
 		const html = renderRedditComment(
 			"https://preview.redd.it/image123.png?width=1200&amp;format=png",
