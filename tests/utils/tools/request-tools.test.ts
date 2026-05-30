@@ -114,7 +114,7 @@ describe("Reddit vote conversion", () => {
 	it("maps Reddit likes to local vote values", () => {
 		expect(convertRedditUserVotes(true)).toBe(1);
 		expect(convertRedditUserVotes(false)).toBe(-1);
-		// oxlint-disable-next-line unicorn/no-null, typescript-eslint/no-unsafe-type-assertion -- Reddit uses null for no vote.
+		// oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- Reddit uses null for no vote.
 		expect(convertRedditUserVotes(JSON.parse("null") as boolean | null)).toBe(
 			0,
 		);

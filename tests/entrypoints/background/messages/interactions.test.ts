@@ -72,7 +72,6 @@ describe("background interactions", () => {
 	}
 
 	it("returns the delete result to callers", async () => {
-		// oxlint-disable-next-line typescript-eslint/no-confusing-void-expression -- This test intentionally exposes that deleteComment currently drops its result.
 		const result = deleteComment({ id: "123", website: Website.LEMMY });
 
 		await expect(Promise.resolve(result)).resolves.toStrictEqual({
@@ -133,7 +132,6 @@ describe("background interactions", () => {
 	});
 
 	it("returns the vote result to callers", async () => {
-		// oxlint-disable-next-line typescript-eslint/no-confusing-void-expression -- This test intentionally exposes that vote currently drops its result.
 		const result = vote({
 			id: "123",
 			kind: Kind.THREAD,
@@ -249,7 +247,6 @@ describe("background interactions", () => {
 		const response = { errorMessage: "User is not logged in.", success: false };
 		mockedGetUser.mockResolvedValue(response);
 
-		// oxlint-disable-next-line typescript-eslint/no-confusing-void-expression -- This test intentionally exposes that deleteComment currently drops failures.
 		const result = deleteComment({ id: "123", website: Website.REDDIT });
 
 		await expect(Promise.resolve(result)).resolves.toBe(response);

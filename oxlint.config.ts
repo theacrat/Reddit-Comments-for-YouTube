@@ -13,6 +13,11 @@ export default defineConfig({
 		builtin: true,
 	},
 	globals: {},
+	options: {
+		reportUnusedDisableDirectives: "warn",
+		typeAware: true,
+		typeCheck: true,
+	},
 	overrides: [
 		{
 			files: ["*.config.{js,ts}", "src/entrypoints/*.ts"],
