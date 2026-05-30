@@ -13,6 +13,7 @@ const communityLinkClassName = styles.communityLink();
 const contentClassName = styles.content();
 const htmlClassName = styles.html();
 const rowClassName = styles.row();
+const separatorClassName = styles.separator();
 const taglineClassName = styles.tagline();
 const timestampButtonClassName = styles.timestampButton();
 const titleClassName = styles.title();
@@ -31,9 +32,9 @@ function ThreadTimestampLinkProps({
 	return (
 		<>
 			{" "}
-			<span> -- </span>
+			<span className={separatorClassName}> -- </span>
 			<Button className={timestampButtonClassName} onPress={onTimestampClick}>
-				{numberToHms(linkedTimestamp)}
+				[{numberToHms(linkedTimestamp)}]
 			</Button>
 		</>
 	);

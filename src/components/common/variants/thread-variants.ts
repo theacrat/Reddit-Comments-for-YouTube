@@ -129,11 +129,17 @@ const threadSummary = tv({
 		row: threadSummaryRow({
 			width: "full",
 		}),
+		separator: textBase({
+			tone: "primary",
+		}),
 		tagline: threadSummaryTagline({
 			size: "12.5px",
 			tone: "secondary",
 		}),
-		timestampButton: transparentButton({ underline: "none" }),
+		timestampButton: transparentButton({
+			textSize: "inherit",
+			underline: "none",
+		}),
 		title: threadSummaryTitle({
 			overflow: "hidden",
 			size: "17px",
