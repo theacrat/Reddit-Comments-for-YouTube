@@ -48,6 +48,7 @@ export default defineConfig({
 	],
 	rules: {
 		"eslint/array-callback-return": ["error", { allowImplicit: true }],
+		"eslint/capitalized-comments": "off",
 		"eslint/default-case": "off",
 		"eslint/func-style": "off",
 		"eslint/id-length": [
