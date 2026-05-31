@@ -139,7 +139,7 @@ async function addToArray(
 	}
 
 	const stored = await storage.getItem<string[]>(storageKey(name));
-	const current = stored ?? settingDef.defaultValue;
+	const current = [...(stored ?? settingDef.defaultValue)];
 
 	if (current.includes(value)) {
 		return i18n.t("duplicateEntry");
@@ -151,10 +151,10 @@ async function addToArray(
 		return result.errorMessage;
 	}
 
-	current.push(result.value);
-	setValue(name, current);
+	const nextValue = [...current, result.value];
+	setValue(name, nextValue);
 
-	return current;
+	return nextValue;
 }
 
 async function removeFromArray(
