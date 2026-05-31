@@ -54,7 +54,7 @@ const listSettingTag = tv({
 });
 
 const listSettingTagList = tv({
-	base: "gap-1",
+	base: "m-0 list-none gap-1 p-0",
 	extend: layoutBase,
 });
 

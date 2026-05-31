@@ -1,15 +1,6 @@
 import { Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import {
-	Button,
-	Input,
-	Label,
-	Tag,
-	TagGroup,
-	TagList,
-	TextField,
-} from "react-aria-components";
-import type { Key } from "react-aria-components";
+import { useCallback, useEffect, useState } from "react";
+import { Button, Input, TextField } from "react-aria-components";
 
 import { listSetting as listSettingStyles } from "@/components/common/variants/popup-variants";
 import { addToArray, getValue, removeFromArray } from "@/utils/settings";
@@ -28,26 +19,6 @@ const rootClassName = styles.root();
 const tagClassName = styles.tag();
 const tagListClassName = styles.tagList();
 const textClassName = styles.text();
-
-interface RemoveEntriesSequentiallyParams {
-	keys: Key[];
-	name: Settings;
-}
-
-async function removeEntriesSequentially({
-	keys,
-	name,
-}: RemoveEntriesSequentiallyParams): Promise<string[]> {
-	const [key, ...remainingKeys] = keys;
-
-	if (key === undefined) {
-		const value = await getValue(name);
-		return Array.isArray(value) ? value : [];
-	}
-
-	await removeFromArray(name, String(key));
-	return removeEntriesSequentially({ keys: remainingKeys, name });
-}
 
 interface ListInputProps {
 	listSetting: ListSetting;
@@ -70,33 +41,42 @@ function ListInput({ listSetting }: ListInputProps) {
 	);
 }
 
-interface ListEntriesProps {
-	entries: ListSetting["entries"];
+interface RemoveButtonProps {
+	entry: string;
+	onRemove: (entry: string) => void;
 }
 
-function RemoveButton() {
+function RemoveButton({ entry, onRemove }: RemoveButtonProps) {
+	const handlePress = useCallback(() => {
+		onRemove(entry);
+	}, [entry, onRemove]);
+
 	return (
-		<Button className={removeButtonClassName} slot="remove">
+		<Button
+			aria-label={`Remove ${entry}`}
+			className={removeButtonClassName}
+			onPress={handlePress}
+		>
 			<Trash className={removeIconClassName} />
 		</Button>
 	);
 }
 
-function ListEntries({ entries }: ListEntriesProps) {
-	const items = useMemo(
-		() => entries.map((entry) => ({ id: entry, name: entry })),
-		[entries],
-	);
+interface ListEntriesProps {
+	entries: ListSetting["entries"];
+	onRemoveEntry: ListSetting["handleRemoveEntry"];
+}
 
+function ListEntries({ entries, onRemoveEntry }: ListEntriesProps) {
 	return (
-		<TagList className={tagListClassName} items={items}>
-			{(entry) => (
-				<Tag className={tagClassName} id={entry.id} textValue={entry.name}>
-					<span className={textClassName}>{entry.name}</span>
-					<RemoveButton />
-				</Tag>
-			)}
-		</TagList>
+		<ul className={tagListClassName}>
+			{entries.map((entry) => (
+				<li className={tagClassName} key={entry}>
+					<span className={textClassName}>{entry}</span>
+					<RemoveButton entry={entry} onRemove={onRemoveEntry} />
+				</li>
+			))}
+		</ul>
 	);
 }
 
@@ -132,13 +112,9 @@ function useListSetting(name: Settings) {
 		})();
 	};
 
-	const handleRemoveEntries = (keys: Set<Key>) => {
+	const handleRemoveEntry = (entry: string) => {
 		void (async () => {
-			const nextEntries = await removeEntriesSequentially({
-				keys: [...keys],
-				name,
-			});
-
+			const nextEntries = await removeFromArray(name, entry);
 			setEntries(nextEntries);
 		})();
 	};
@@ -148,7 +124,7 @@ function useListSetting(name: Settings) {
 		errorMessage,
 		handleAddEntry,
 		handleInputChange,
-		handleRemoveEntries,
+		handleRemoveEntry,
 		inputValue,
 	};
 }
@@ -160,17 +136,15 @@ interface ListSettingProps {
 function ListSetting({ setting }: ListSettingProps) {
 	const listSetting = useListSetting(setting.name);
 
-	const { errorMessage, entries, handleRemoveEntries } = listSetting;
+	const { errorMessage, entries, handleRemoveEntry } = listSetting;
 
 	return (
-		<TagGroup className={rootClassName} onRemove={handleRemoveEntries}>
-			<Label className={labelClassName}>{setting.label}</Label>
+		<div className={rootClassName}>
+			<span className={labelClassName}>{setting.label}</span>
 			<ListInput listSetting={listSetting} />
-			<span className={errorClassName} slot="errorMessage">
-				{errorMessage}
-			</span>
-			<ListEntries entries={entries} />
-		</TagGroup>
+			<span className={errorClassName}>{errorMessage}</span>
+			<ListEntries entries={entries} onRemoveEntry={handleRemoveEntry} />
+		</div>
 	);
 }
 
