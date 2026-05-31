@@ -1,4 +1,5 @@
 import { Trash } from "lucide-react";
+import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, TextField } from "react-aria-components";
 
@@ -27,13 +28,25 @@ interface ListInputProps {
 function ListInput({ listSetting }: ListInputProps) {
 	const { inputValue, handleAddEntry, handleInputChange } = listSetting;
 
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent<HTMLInputElement>) => {
+			if (event.key !== "Enter") {
+				return;
+			}
+
+			event.preventDefault();
+			handleAddEntry();
+		},
+		[handleAddEntry],
+	);
+
 	return (
 		<TextField
 			className={formRowClassName}
 			onChange={handleInputChange}
 			value={inputValue}
 		>
-			<Input />
+			<Input onKeyDown={handleKeyDown} />
 			<Button className={addButtonClassName} onPress={handleAddEntry}>
 				{i18n.t("popupButtons.add")}
 			</Button>
