@@ -51,6 +51,24 @@ const initialThreadStoreState = {
 	isLoading: true,
 } satisfies ThreadStoreState;
 
+interface CanUserInteractWithThreadParams {
+	thread?: Thread | undefined;
+	user?: User | undefined;
+}
+
+function canUserInteractWithThread({
+	thread,
+	user,
+}: CanUserInteractWithThreadParams) {
+	return Boolean(
+		thread &&
+		user &&
+		user.website === thread.website &&
+		!thread.archived &&
+		!user.isSuspended,
+	);
+}
+
 interface ReplaceCommentInThreadParams {
 	post: Post;
 	thread: Thread;
@@ -293,9 +311,7 @@ function useCurrentSite() {
 }
 
 function useCanVote() {
-	return useThreadStore(
-		({ thread, user }) => !thread?.archived && !user?.isSuspended,
-	);
+	return useThreadStore(canUserInteractWithThread);
 }
 
 function useCanPost() {
@@ -309,6 +325,7 @@ function useCanPost() {
 export {
 	useThreadStore,
 	initialiseThreadStore,
+	canUserInteractWithThread,
 	useCurrentThread,
 	useCurrentSite,
 	useCanVote,
