@@ -56,6 +56,7 @@ const settingDefs = {
 				.pop()
 				?.split("!")
 				.pop();
+
 			if (!splitValue) {
 				return { errorMessage: i18n.t("invalidSubreddit"), value: "" };
 			}
@@ -65,8 +66,9 @@ const settingDefs = {
 			}
 
 			const prefixedValue = splitValue.includes("@")
-				? `!${value}`
-				: `r/${value}`;
+				? `!${splitValue}`
+				: `r/${splitValue}`;
+
 			return { errorMessage: "", value: prefixedValue };
 		},
 	},
