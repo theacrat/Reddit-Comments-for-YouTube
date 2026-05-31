@@ -26,6 +26,9 @@ vi.mock("@/utils/settings", () => ({
 
 vi.mock("@/utils/tools/request-tools", () => ({
 	buildLemmyApiUrl: mockedBuildLemmyApiUrl,
+	getLemmyAuthHeaders: (token: string) => ({
+		Authorization: `Bearer ${token}`,
+	}),
 	requestJson: mockedRequestJson,
 }));
 
@@ -37,7 +40,7 @@ describe("getUser", () => {
 		vi.clearAllMocks();
 		resetUser();
 		mockedBuildLemmyApiUrl.mockResolvedValue(
-			new URL("https://lemmy.example/api/v3/site?auth=token"),
+			new URL("https://lemmy.example/api/v3/site"),
 		);
 		mockedGetValue.mockImplementation(async (setting) => {
 			await Promise.resolve();
@@ -134,8 +137,16 @@ describe("getUser", () => {
 		expect(mockedImportedGetValue).toHaveBeenCalledWith(Settings.LEMMYDOMAIN);
 		expect(mockedBuildLemmyApiUrl).toHaveBeenCalledWith({
 			endpoint: "site",
-			searchParams: { auth: "token" },
 		});
+		expect(mockedImportedRequestJson).toHaveBeenCalledWith(
+			new URL("https://lemmy.example/api/v3/site"),
+			expect.anything(),
+			{
+				headers: {
+					Authorization: "Bearer token",
+				},
+			},
+		);
 		expect(mockedImportedRequestJson).toHaveBeenCalledOnce();
 	});
 

@@ -10,7 +10,11 @@ import {
 	lemmyCommentsToComments,
 	redditCommentsToComments,
 } from "@/utils/mappers/comment-mapper";
-import { buildLemmyApiUrl, requestJson } from "@/utils/tools/request-tools";
+import {
+	buildLemmyApiUrl,
+	getStoredLemmyAuthConfig,
+	requestJson,
+} from "@/utils/tools/request-tools";
 import {
 	lemmyCommentResponseSchema,
 	redditReplyResponseSchema,
@@ -158,7 +162,6 @@ async function getMoreChildrenLemmy({
 	const topLevel = moreChildren.parent === moreChildren.threadId;
 
 	const url = await buildLemmyApiUrl({
-		auth: true,
 		endpoint: "comment/list",
 		searchParams: {
 			...(topLevel
@@ -177,7 +180,11 @@ async function getMoreChildrenLemmy({
 		} satisfies LemmyMoreChildrenBody,
 	});
 
-	const response = await requestJson(url, lemmyMoreChildrenResponseSchema);
+	const response = await requestJson(
+		url,
+		lemmyMoreChildrenResponseSchema,
+		await getStoredLemmyAuthConfig(),
+	);
 
 	if (!response.success) {
 		return response;

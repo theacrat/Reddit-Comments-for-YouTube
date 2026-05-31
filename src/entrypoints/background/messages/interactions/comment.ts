@@ -7,7 +7,6 @@ import {
 	redditCommentsToComments,
 } from "@/utils/mappers/comment-mapper";
 import {
-	addLemmyAuth,
 	buildLemmyApiUrl,
 	getLemmyAuthHeaders,
 	requestJson,
@@ -58,31 +57,21 @@ function isComment(reply: Comment | MoreReplies): reply is Comment {
 
 interface BuildLemmyCommentBodyParams {
 	request: CommentRequest;
-	token: string;
 }
 
-function buildLemmyCommentBody({
-	request,
-	token,
-}: BuildLemmyCommentBodyParams) {
+function buildLemmyCommentBody({ request }: BuildLemmyCommentBodyParams) {
 	if (request.isEdit) {
-		return addLemmyAuth(
-			{
-				comment_id: Number(request.id),
-				content: request.text,
-			} satisfies LemmyEditCommentBody,
-			token,
-		);
+		return {
+			comment_id: Number(request.id),
+			content: request.text,
+		} satisfies LemmyEditCommentBody;
 	}
 
-	return addLemmyAuth(
-		{
-			content: request.text,
-			parent_id: Number(request.id),
-			post_id: Number(request.threadId),
-		} satisfies LemmyCreateCommentBody,
-		token,
-	);
+	return {
+		content: request.text,
+		parent_id: Number(request.id),
+		post_id: Number(request.threadId),
+	} satisfies LemmyCreateCommentBody;
 }
 
 async function commentReddit(
@@ -154,10 +143,7 @@ async function commentLemmy(
 		url,
 		lemmyCommentInteractionResponseSchema,
 		{
-			data: buildLemmyCommentBody({
-				request,
-				token: currentUser.value.token,
-			}),
+			data: buildLemmyCommentBody({ request }),
 			headers: getLemmyAuthHeaders(currentUser.value.token),
 			method,
 		},

@@ -1,7 +1,6 @@
 import { getUser } from "@/entrypoints/background/messages/get-user";
 import { Kind, REDDIT_API_DOMAIN, Website } from "@/utils/constants";
 import {
-	addLemmyAuth,
 	buildLemmyApiUrl,
 	getLemmyAuthHeaders,
 	requestCatch,
@@ -59,7 +58,7 @@ async function voteLemmy(
 	const contentKind = request.kind === Kind.COMMENT ? "comment" : "post";
 	const url = await buildLemmyApiUrl({ endpoint: `${contentKind}/like` });
 
-	const body = addLemmyAuth(
+	const body =
 		contentKind === "comment"
 			? ({
 					comment_id: Number(request.id),
@@ -68,9 +67,7 @@ async function voteLemmy(
 			: ({
 					post_id: Number(request.id),
 					score: request.vote,
-				} satisfies LemmyPostVoteBody),
-		currentUser.value.token,
-	);
+				} satisfies LemmyPostVoteBody);
 
 	void requestCatch(url, {
 		data: body,

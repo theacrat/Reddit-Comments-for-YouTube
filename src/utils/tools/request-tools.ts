@@ -37,20 +37,17 @@ function appendSearchParams(
 }
 
 interface BuildLemmyApiUrlParams {
-	auth?: boolean;
 	endpoint: string;
 	searchParams?: Record<string, SearchParamValue>;
 }
 
 async function buildLemmyApiUrl({
-	auth = false,
 	endpoint,
 	searchParams = {},
 }: BuildLemmyApiUrlParams) {
 	const url = new URL(await buildLemmyUrl({ api: true, endpoint }));
-	const token = auth ? await getValue(Settings.LEMMYTOKEN) : undefined;
 
-	return appendSearchParams(url, { ...searchParams, auth: token });
+	return appendSearchParams(url, searchParams);
 }
 
 function getLemmyAuthHeaders(token: string) {
@@ -59,11 +56,10 @@ function getLemmyAuthHeaders(token: string) {
 	};
 }
 
-function addLemmyAuth<T extends object>(data: T, token: string) {
-	return {
-		...data,
-		auth: token,
-	};
+async function getStoredLemmyAuthConfig(): Promise<AxiosRequestConfig> {
+	const token = await getValue(Settings.LEMMYTOKEN);
+
+	return token ? { headers: getLemmyAuthHeaders(token) } : {};
 }
 
 function convertRedditUserVotes(likes: boolean | null) {
@@ -155,12 +151,12 @@ async function requestText(url: string | URL, config?: AxiosRequestConfig) {
 }
 
 export {
-	addLemmyAuth,
 	appendSearchParams,
 	buildLemmyApiUrl,
 	buildLemmyUrl,
 	convertRedditUserVotes,
 	getLemmyAuthHeaders,
+	getStoredLemmyAuthConfig,
 	requestCatch,
 	requestJson,
 	requestText,

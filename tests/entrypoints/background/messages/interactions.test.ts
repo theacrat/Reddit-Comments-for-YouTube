@@ -23,10 +23,6 @@ vi.mock("@/entrypoints/background/messages/get-user", () => ({
 }));
 
 vi.mock("@/utils/tools/request-tools", () => ({
-	addLemmyAuth: (body: Record<string, unknown>, token: string) => ({
-		auth: token,
-		...body,
-	}),
 	buildLemmyApiUrl: mockedBuildLemmyApiUrl,
 	getLemmyAuthHeaders: (token: string) => ({
 		Authorization: `Bearer ${token}`,
@@ -119,7 +115,6 @@ describe("background interactions", () => {
 			new URL("https://lemmy.example/api/v3/comment/delete"),
 			{
 				data: {
-					auth: "token",
 					comment_id: 123,
 					deleted: true,
 				},
@@ -195,7 +190,6 @@ describe("background interactions", () => {
 			new URL("https://lemmy.example/api/v3/post/like"),
 			{
 				data: {
-					auth: "token",
 					post_id: 456,
 					score: 1,
 				},
@@ -231,7 +225,6 @@ describe("background interactions", () => {
 			new URL("https://lemmy.example/api/v3/comment/like"),
 			{
 				data: {
-					auth: "token",
 					comment_id: 789,
 					score: 0,
 				},

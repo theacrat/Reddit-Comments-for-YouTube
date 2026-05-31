@@ -6,16 +6,16 @@ import {
 	Website,
 } from "@/utils/constants";
 import { Settings, getValue } from "@/utils/settings";
-import { buildLemmyApiUrl, requestJson } from "@/utils/tools/request-tools";
+import {
+	buildLemmyApiUrl,
+	getLemmyAuthHeaders,
+	requestJson,
+} from "@/utils/tools/request-tools";
 import type { User } from "@/utils/types/elements";
 import type { FetchResponse } from "@/utils/types/network-responses";
 
 let redditUser: User | undefined;
 let lemmyUser: User | undefined;
-
-interface LemmySiteBody {
-	auth: string;
-}
 
 const redditLoggedInUserDataSchema = z.object({
 	is_suspended: z.boolean(),
@@ -96,10 +96,11 @@ async function getUserLemmy(): Promise<FetchResponse<User>> {
 	const domain = await getValue(Settings.LEMMYDOMAIN);
 	const url = await buildLemmyApiUrl({
 		endpoint: "site",
-		searchParams: { auth: token } satisfies LemmySiteBody,
 	});
 
-	const response = await requestJson(url, lemmyUserResponseSchema);
+	const response = await requestJson(url, lemmyUserResponseSchema, {
+		headers: getLemmyAuthHeaders(token),
+	});
 	if (!response.success) {
 		return response;
 	}

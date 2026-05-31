@@ -3,12 +3,12 @@ import { z } from "zod";
 
 import { Settings, getValue } from "@/utils/settings";
 import {
-	addLemmyAuth,
 	appendSearchParams,
 	buildLemmyApiUrl,
 	buildLemmyUrl,
 	convertRedditUserVotes,
 	getLemmyAuthHeaders,
+	getStoredLemmyAuthConfig,
 	requestJson,
 	requestText,
 } from "@/utils/tools/request-tools";
@@ -69,9 +69,8 @@ describe("Lemmy request helpers", () => {
 		).resolves.toBe("https://lemmy.example/api/v3/post/list");
 	});
 
-	it("builds API URLs with search params and optional auth", async () => {
+	it("builds API URLs with search params", async () => {
 		const url = await buildLemmyApiUrl({
-			auth: true,
 			endpoint: "post/list",
 			searchParams: {
 				community_name: "typescript",
@@ -82,7 +81,7 @@ describe("Lemmy request helpers", () => {
 		});
 
 		expect(url.toString()).toBe(
-			"https://lemmy.example/api/v3/post/list?community_name=typescript&limit=20&saved_only=false&auth=token-123",
+			"https://lemmy.example/api/v3/post/list?community_name=typescript&limit=20&saved_only=false",
 		);
 	});
 
@@ -99,14 +98,24 @@ describe("Lemmy request helpers", () => {
 		);
 	});
 
-	it("creates Lemmy auth payloads and headers", () => {
+	it("creates Lemmy auth headers", () => {
 		expect(getLemmyAuthHeaders("abc")).toStrictEqual({
 			Authorization: "Bearer abc",
 		});
-		expect(addLemmyAuth({ post_id: 1 }, "abc")).toStrictEqual({
-			auth: "abc",
-			post_id: 1,
+	});
+
+	it("creates stored Lemmy auth config when a token exists", async () => {
+		await expect(getStoredLemmyAuthConfig()).resolves.toStrictEqual({
+			headers: {
+				Authorization: "Bearer token-123",
+			},
 		});
+	});
+
+	it("omits stored Lemmy auth config when a token does not exist", async () => {
+		mockedGetValue.mockResolvedValue("");
+
+		await expect(getStoredLemmyAuthConfig()).resolves.toStrictEqual({});
 	});
 });
 

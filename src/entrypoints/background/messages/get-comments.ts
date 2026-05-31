@@ -10,7 +10,11 @@ import {
 	lemmyCommentsToComments,
 	redditCommentsToComments,
 } from "@/utils/mappers/comment-mapper";
-import { buildLemmyApiUrl, requestJson } from "@/utils/tools/request-tools";
+import {
+	buildLemmyApiUrl,
+	getStoredLemmyAuthConfig,
+	requestJson,
+} from "@/utils/tools/request-tools";
 import {
 	lemmyCommentResponseSchema,
 	redditReplyResponseSchema,
@@ -76,7 +80,6 @@ async function getLemmyThread(
 	sort: string,
 ): Promise<FetchResponse<Replies>> {
 	const url = await buildLemmyApiUrl({
-		auth: true,
 		endpoint: "comment/list",
 		searchParams: {
 			limit: 50,
@@ -86,7 +89,11 @@ async function getLemmyThread(
 		} satisfies LemmyCommentListBody,
 	});
 
-	const response = await requestJson(url, lemmyCommentsResponseSchema);
+	const response = await requestJson(
+		url,
+		lemmyCommentsResponseSchema,
+		await getStoredLemmyAuthConfig(),
+	);
 
 	if (!response.success) {
 		return response;

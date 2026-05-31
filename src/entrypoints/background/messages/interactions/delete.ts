@@ -1,7 +1,6 @@
 import { getUser } from "@/entrypoints/background/messages/get-user";
 import { REDDIT_API_DOMAIN, Website } from "@/utils/constants";
 import {
-	addLemmyAuth,
 	buildLemmyApiUrl,
 	getLemmyAuthHeaders,
 	requestCatch,
@@ -51,13 +50,10 @@ async function deleteLemmyComment(
 	}
 
 	const url = await buildLemmyApiUrl({ endpoint: "comment/delete" });
-	const body = addLemmyAuth(
-		{
-			comment_id: Number(request.id),
-			deleted: true,
-		} satisfies LemmyDeleteCommentBody,
-		currentUser.value.token,
-	);
+	const body = {
+		comment_id: Number(request.id),
+		deleted: true,
+	} satisfies LemmyDeleteCommentBody;
 
 	void requestCatch(url, {
 		data: body,

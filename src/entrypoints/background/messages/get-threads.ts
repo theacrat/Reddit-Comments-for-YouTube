@@ -6,7 +6,11 @@ import {
 	redditThreadToThread,
 } from "@/utils/mappers/thread-mapper";
 import { Settings, getValue } from "@/utils/settings";
-import { buildLemmyApiUrl, requestJson } from "@/utils/tools/request-tools";
+import {
+	buildLemmyApiUrl,
+	getStoredLemmyAuthConfig,
+	requestJson,
+} from "@/utils/tools/request-tools";
 import {
 	lemmyThreadResponseSchema,
 	redditThreadResponseSchema,
@@ -84,7 +88,11 @@ async function getLemmyPage({
 }: GetLemmyPageParams): Promise<FetchResponse<Thread[]>> {
 	url.searchParams.set("page", page.toString());
 
-	const response = await requestJson(url, lemmySearchResponseSchema);
+	const response = await requestJson(
+		url,
+		lemmySearchResponseSchema,
+		await getStoredLemmyAuthConfig(),
+	);
 
 	if (!response.success) {
 		return response;
@@ -165,7 +173,6 @@ async function mapLemmyQueries({ site, videoId }: MapLemmyQueriesParams) {
 	return Promise.all(
 		urls.flatMap(async (templateUrl) => {
 			const url = await buildLemmyApiUrl({
-				auth: true,
 				endpoint: "search",
 				searchParams: {
 					q: templateUrl,
