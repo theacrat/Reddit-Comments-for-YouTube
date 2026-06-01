@@ -1,11 +1,16 @@
-import axios, { isAxiosError } from "axios";
-import type { AxiosRequestConfig } from "axios";
 import type { ZodType } from "zod";
 
 import { Settings, getValue } from "@/utils/settings";
 import type { FetchResponse } from "@/utils/types/network-responses";
 
 type SearchParamValue = boolean | number | string | undefined;
+type RequestData = URLSearchParams | object | string;
+
+interface RequestConfig {
+	data?: RequestData;
+	headers?: HeadersInit;
+	method?: string;
+}
 
 interface BuildLemmyUrlParams {
 	api?: boolean;
@@ -56,7 +61,7 @@ function getLemmyAuthHeaders(token: string) {
 	};
 }
 
-async function getStoredLemmyAuthConfig(): Promise<AxiosRequestConfig> {
+async function getStoredLemmyAuthConfig(): Promise<RequestConfig> {
 	const token = await getValue(Settings.LEMMYTOKEN);
 
 	return token ? { headers: getLemmyAuthHeaders(token) } : {};
@@ -71,32 +76,90 @@ function convertRedditUserVotes(likes: boolean | null) {
 }
 
 function getRequestErrorMessage(error: unknown) {
-	if (isAxiosError(error)) {
-		if (error.response) {
-			return `${error.response.status} ${error.response.statusText}`;
-		}
-
+	if (error instanceof TypeError) {
 		return navigator.onLine ? "Network error" : "Internet offline";
 	}
 
 	return error instanceof Error ? error.message : "Unknown request error";
 }
 
-function normalise(url: string | URL) {
-	return url.toString();
+function getRequestBody(data: RequestConfig["data"]): BodyInit | undefined {
+	if (data === undefined) {
+		return;
+	}
+
+	if (data instanceof URLSearchParams || typeof data === "string") {
+		return data;
+	}
+
+	return JSON.stringify(data);
 }
 
-async function requestCatch<T = unknown>(
-	url: string | URL,
-	config?: AxiosRequestConfig,
-): Promise<FetchResponse<T>> {
-	try {
-		const response = await axios.request<T>({
-			url: normalise(url),
-			...config,
-		});
+function getRequestHeaders(config: RequestConfig) {
+	const headers = new Headers(config.headers);
 
-		return { success: true, value: response.data };
+	if (
+		config.data &&
+		!(config.data instanceof URLSearchParams) &&
+		typeof config.data !== "string" &&
+		!headers.has("content-type")
+	) {
+		headers.set("content-type", "application/json");
+	}
+
+	return headers;
+}
+
+const parseJson = JSON.parse as (text: string) => unknown;
+
+async function readJsonResponse(response: Response) {
+	return parseJson(await response.text());
+}
+
+async function readTextResponse(response: Response) {
+	return response.text();
+}
+
+async function requestCatch(
+	url: string | URL,
+	config?: RequestConfig,
+): Promise<FetchResponse<unknown>>;
+async function requestCatch<T>(
+	url: string | URL,
+	config: RequestConfig | undefined,
+	readResponse: (response: Response) => Promise<T>,
+): Promise<FetchResponse<T>>;
+async function requestCatch(
+	url: string | URL,
+	config: RequestConfig = {},
+	readResponse = readJsonResponse,
+): Promise<FetchResponse<unknown>> {
+	const requestInit: RequestInit = {
+		headers: getRequestHeaders(config),
+	};
+	const body = getRequestBody(config.data);
+
+	if (body !== undefined) {
+		requestInit.body = body;
+	}
+
+	if (config.method) {
+		requestInit.method = config.method;
+	}
+
+	try {
+		const response = await fetch(url.toString(), requestInit);
+
+		if (!response.ok) {
+			return {
+				errorMessage: `${response.status} ${response.statusText}`,
+				success: false,
+			};
+		}
+
+		const value = await readResponse(response);
+
+		return { success: true, value };
 	} catch (error) {
 		return {
 			errorMessage: getRequestErrorMessage(error),
@@ -105,22 +168,22 @@ async function requestCatch<T = unknown>(
 	}
 }
 
-async function requestJson<T = unknown>(
+async function requestJson(
 	url: string | URL,
-	config?: AxiosRequestConfig,
-): Promise<FetchResponse<T>>;
+	config?: RequestConfig,
+): Promise<FetchResponse<unknown>>;
 async function requestJson<T>(
 	url: string | URL,
 	schema: ZodType<T>,
-	config?: AxiosRequestConfig,
+	config?: RequestConfig,
 ): Promise<FetchResponse<T>>;
 async function requestJson<T>(
 	url: string | URL,
-	schemaOrConfig?: AxiosRequestConfig | ZodType<T>,
-	config?: AxiosRequestConfig,
-): Promise<FetchResponse<T>> {
+	schemaOrConfig?: RequestConfig | ZodType<T>,
+	config?: RequestConfig,
+): Promise<FetchResponse<T> | FetchResponse<unknown>> {
 	if (!schemaOrConfig || !("safeParse" in schemaOrConfig)) {
-		return requestCatch<T>(url, schemaOrConfig);
+		return requestCatch(url, schemaOrConfig);
 	}
 
 	const response = await requestCatch(url, config);
@@ -143,11 +206,8 @@ async function requestJson<T>(
 	return { success: true, value: parsed.data };
 }
 
-async function requestText(url: string | URL, config?: AxiosRequestConfig) {
-	return requestCatch<string>(url, {
-		...config,
-		responseType: "text",
-	});
+async function requestText(url: string | URL, config?: RequestConfig) {
+	return requestCatch(url, config, readTextResponse);
 }
 
 export {

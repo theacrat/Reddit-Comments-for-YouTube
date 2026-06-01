@@ -13,8 +13,8 @@ import {
 	requestText,
 } from "@/utils/tools/request-tools";
 
-const { mockedAxiosRequest } = vi.hoisted(() => ({
-	mockedAxiosRequest: vi.fn(),
+const { mockedFetch } = vi.hoisted(() => ({
+	mockedFetch: vi.fn<typeof fetch>(),
 }));
 
 vi.mock("@/utils/settings", () => ({
@@ -23,17 +23,6 @@ vi.mock("@/utils/settings", () => ({
 		LEMMYTOKEN: "lemmyToken",
 	},
 	getValue: vi.fn(),
-}));
-
-vi.mock("axios", () => ({
-	default: {
-		request: mockedAxiosRequest,
-	},
-	isAxiosError: (error: unknown) =>
-		typeof error === "object" &&
-		error !== null &&
-		"isAxiosError" in error &&
-		error.isAxiosError === true,
 }));
 
 const mockedGetValue = vi.mocked(getValue);
@@ -53,11 +42,22 @@ async function getMockSetting(name: Settings) {
 }
 
 beforeEach(() => {
-	mockedAxiosRequest.mockReset();
+	mockedFetch.mockReset();
 	mockedGetValue.mockImplementation(getMockSetting);
 
+	vi.stubGlobal("fetch", mockedFetch);
 	vi.stubGlobal("navigator", { onLine: true });
 });
+
+function getFirstFetchOptions() {
+	const [, options] = mockedFetch.mock.calls[0] ?? [];
+
+	if (!options) {
+		throw new Error("Expected fetch to have been called.");
+	}
+
+	return options;
+}
 
 describe("Lemmy request helpers", () => {
 	it("builds Lemmy URLs with normalised endpoints", async () => {
@@ -132,7 +132,15 @@ describe("Reddit vote conversion", () => {
 
 describe("requestJson", () => {
 	it("returns successful JSON responses", async () => {
-		mockedAxiosRequest.mockResolvedValueOnce({ data: { ok: true } });
+		mockedFetch.mockResolvedValueOnce(
+			Response.json(
+				{ ok: true },
+				{
+					headers: { "content-type": "application/json" },
+					status: 200,
+				},
+			),
+		);
 
 		await expect(
 			requestJson("https://example.test/api"),
@@ -143,9 +151,15 @@ describe("requestJson", () => {
 	});
 
 	it("validates responses against a schema", async () => {
-		mockedAxiosRequest.mockResolvedValueOnce({
-			data: { id: 1, title: "Hello" },
-		});
+		mockedFetch.mockResolvedValueOnce(
+			Response.json(
+				{ id: 1, title: "Hello" },
+				{
+					headers: { "content-type": "application/json" },
+					status: 200,
+				},
+			),
+		);
 
 		await expect(
 			requestJson("https://example.test/api", z.object({ id: z.number() })),
@@ -156,7 +170,15 @@ describe("requestJson", () => {
 	});
 
 	it("returns an invalid-shape error when schema validation fails", async () => {
-		mockedAxiosRequest.mockResolvedValueOnce({ data: { id: "wrong" } });
+		mockedFetch.mockResolvedValueOnce(
+			Response.json(
+				{ id: "wrong" },
+				{
+					headers: { "content-type": "application/json" },
+					status: 200,
+				},
+			),
+		);
 		vi.spyOn(console, "error").mockImplementation(() => {
 			/* Empty */
 		});
@@ -169,14 +191,13 @@ describe("requestJson", () => {
 		});
 	});
 
-	it("uses response status text for Axios response errors", async () => {
-		mockedAxiosRequest.mockRejectedValueOnce({
-			isAxiosError: true,
-			response: {
+	it("uses response status text for failed HTTP responses", async () => {
+		mockedFetch.mockResolvedValueOnce(
+			new Response("", {
 				status: 429,
 				statusText: "Too Many Requests",
-			},
-		});
+			}),
+		);
 
 		await expect(
 			requestJson("https://example.test/api"),
@@ -186,9 +207,9 @@ describe("requestJson", () => {
 		});
 	});
 
-	it("reports offline Axios request failures", async () => {
+	it("reports offline request failures", async () => {
 		vi.stubGlobal("navigator", { onLine: false });
-		mockedAxiosRequest.mockRejectedValueOnce({ isAxiosError: true });
+		mockedFetch.mockRejectedValueOnce(new TypeError("Failed to fetch"));
 
 		await expect(
 			requestJson("https://example.test/api"),
@@ -198,18 +219,59 @@ describe("requestJson", () => {
 		});
 	});
 
-	it("uses text responseType for text requests", async () => {
-		mockedAxiosRequest.mockResolvedValueOnce({ data: "plain text" });
+	it("sends object data as JSON", async () => {
+		mockedFetch.mockResolvedValueOnce(Response.json({ ok: true }));
 
 		await expect(
-			requestText(new URL("https://example.test/text")),
+			requestJson("https://example.test/api", {
+				data: { ok: true },
+				method: "POST",
+			}),
 		).resolves.toStrictEqual({
+			success: true,
+			value: { ok: true },
+		});
+
+		const options = getFirstFetchOptions();
+
+		expect(options.body).toBe(JSON.stringify({ ok: true }));
+		expect(options.headers).toStrictEqual(
+			new Headers({ "content-type": "application/json" }),
+		);
+		expect(options.method).toBe("POST");
+	});
+
+	it("sends URLSearchParams data as form data", async () => {
+		const data = new URLSearchParams({ ok: "true" });
+		mockedFetch.mockResolvedValueOnce(Response.json({ ok: true }));
+
+		await expect(
+			requestJson("https://example.test/api", {
+				data,
+				method: "POST",
+			}),
+		).resolves.toStrictEqual({
+			success: true,
+			value: { ok: true },
+		});
+
+		const options = getFirstFetchOptions();
+
+		expect(options.body).toBe(data);
+		expect(options.headers).toStrictEqual(new Headers());
+		expect(options.method).toBe("POST");
+	});
+
+	it("uses text responseType for text requests", async () => {
+		const url = new URL("https://example.test/text");
+		mockedFetch.mockResolvedValueOnce(new Response("plain text"));
+
+		await expect(requestText(url)).resolves.toStrictEqual({
 			success: true,
 			value: "plain text",
 		});
-		expect(mockedAxiosRequest).toHaveBeenCalledWith({
-			responseType: "text",
-			url: "https://example.test/text",
+		expect(mockedFetch).toHaveBeenCalledWith(url.toString(), {
+			headers: new Headers(),
 		});
 	});
 });
