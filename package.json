@@ -34,7 +34,6 @@
 		"react-dom": "^19.2.5",
 		"tailwind-variants": "^3.2.2",
 		"tailwindcss": "^4.2.4",
-		"youtube-search-api": "^2.0.1",
 		"zod": "^4.4.2",
 		"zustand": "^5.0.12"
 	},

@@ -1,16 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchItem } from "youtube-search-api";
 
 import { searchYouTube } from "@/entrypoints/background/messages/search-youtube";
 import { findYouTubeMatch } from "@/entrypoints/background/messages/search-youtube/youtube-match";
+import type { YouTubeSearchResult } from "@/entrypoints/background/messages/search-youtube/youtube-match";
 import type { SearchYouTubeRequest } from "@/utils/types/network-requests";
 
-const { mockedGetListByKeyword } = vi.hoisted(() => ({
-	mockedGetListByKeyword: vi.fn<() => unknown>(),
-}));
-
-vi.mock("youtube-search-api", () => ({
-	GetListByKeyword: mockedGetListByKeyword,
+const { mockedFetch } = vi.hoisted(() => ({
+	mockedFetch: vi.fn<typeof fetch>(),
 }));
 
 const baseRequest: SearchYouTubeRequest = {
@@ -20,16 +16,47 @@ const baseRequest: SearchYouTubeRequest = {
 	videoLength: 600,
 };
 
-function createSearchItem(overrides: Partial<SearchItem>): SearchItem {
+function createSearchItem(
+	overrides: Partial<YouTubeSearchResult>,
+): YouTubeSearchResult {
 	return {
 		channelTitle: "Example Channel",
 		id: "video-1",
 		length: { simpleText: "10:02" },
-		thumbnail: undefined,
 		title: "Episode 12 - A Useful Title",
-		type: "video",
 		...overrides,
 	};
+}
+
+function createYouTubeSearchPage(items: YouTubeSearchResult[]) {
+	return `<html><body><script>var ytInitialData = ${JSON.stringify({
+		contents: {
+			twoColumnSearchResultsRenderer: {
+				primaryContents: {
+					sectionListRenderer: {
+						contents: [
+							{
+								itemSectionRenderer: {
+									contents: items.map((item) => ({
+										videoRenderer: {
+											lengthText: item.length,
+											longBylineText: {
+												runs: [{ text: item.channelTitle }],
+											},
+											title: {
+												runs: [{ text: item.title }],
+											},
+											videoId: item.id,
+										},
+									})),
+								},
+							},
+						],
+					},
+				},
+			},
+		},
+	})};</script></body></html>`;
 }
 
 describe("findYouTubeMatch", () => {
@@ -75,39 +102,42 @@ describe("findYouTubeMatch", () => {
 describe("searchYouTube", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.stubGlobal("fetch", mockedFetch);
 	});
 
 	afterEach(() => {
 		vi.restoreAllMocks();
+		vi.unstubAllGlobals();
 	});
 
 	it("searches YouTube and returns the matched video id", async () => {
-		mockedGetListByKeyword.mockResolvedValue({
-			items: [createSearchItem({ id: "matched-video" })],
-		});
+		mockedFetch.mockResolvedValue(
+			new Response(
+				createYouTubeSearchPage([createSearchItem({ id: "matched-video" })]),
+			),
+		);
 
 		await expect(searchYouTube(baseRequest)).resolves.toStrictEqual({
 			success: true,
 			value: "matched-video",
 		});
-		expect(mockedGetListByKeyword).toHaveBeenCalledWith(
-			"Example Channel Episode 12 - A Useful Title",
-			false,
-			20,
-			[{ type: "video" }],
+		expect(mockedFetch).toHaveBeenCalledWith(
+			"https://www.youtube.com/results?search_query=Example+Channel+Episode+12+-+A+Useful+Title",
 		);
 	});
 
 	it("caches identical searches", async () => {
 		const request = { ...baseRequest, title: "Episode 12 - Cache Test" };
-		mockedGetListByKeyword.mockResolvedValue({
-			items: [
-				createSearchItem({
-					id: "cached-video",
-					title: "Episode 12 - Cache Test",
-				}),
-			],
-		});
+		mockedFetch.mockResolvedValue(
+			new Response(
+				createYouTubeSearchPage([
+					createSearchItem({
+						id: "cached-video",
+						title: "Episode 12 - Cache Test",
+					}),
+				]),
+			),
+		);
 
 		await expect(searchYouTube(request)).resolves.toStrictEqual({
 			success: true,
@@ -117,14 +147,14 @@ describe("searchYouTube", () => {
 			success: true,
 			value: "cached-video",
 		});
-		expect(mockedGetListByKeyword).toHaveBeenCalledOnce();
+		expect(mockedFetch).toHaveBeenCalledOnce();
 	});
 
-	it("returns a parse error when YouTube search throws", async () => {
+	it("returns a parse error when YouTube search cannot be parsed", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => {
 			/* Empty */
 		});
-		mockedGetListByKeyword.mockRejectedValue(new Error("bad response"));
+		mockedFetch.mockResolvedValue(new Response("<html></html>"));
 
 		await expect(
 			searchYouTube({ ...baseRequest, title: "Different title" }),

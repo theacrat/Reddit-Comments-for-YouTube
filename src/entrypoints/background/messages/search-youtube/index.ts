@@ -1,15 +1,61 @@
-import { GetListByKeyword as getListByKeyword } from "youtube-search-api";
-import type { SearchItem } from "youtube-search-api";
+import { z } from "zod";
 
 import type { SearchYouTubeRequest } from "@/utils/types/network-requests";
 import type { FetchResponse } from "@/utils/types/network-responses";
 
 import { findYouTubeMatch } from "./youtube-match";
+import type { YouTubeSearchResult } from "./youtube-match";
+
+const YOUTUBE_INITIAL_DATA_REGEX =
+	/var ytInitialData\s*=\s*(\{[\s\S]*?\});\s*<\/script>/;
+
+const youtubeRunSchema = z.looseObject({
+	text: z.string(),
+});
+
+const youtubeVideoRendererSchema = z.looseObject({
+	lengthText: z.object({
+		simpleText: z.string(),
+	}),
+	longBylineText: z.object({
+		runs: z.array(youtubeRunSchema).min(1),
+	}),
+	title: z.object({
+		runs: z.array(youtubeRunSchema).min(1),
+	}),
+	videoId: z.string(),
+});
+
+const youtubeSearchItemSchema = z.looseObject({
+	videoRenderer: youtubeVideoRendererSchema.optional(),
+});
+
+const youtubeSearchResponseSchema = z.object({
+	contents: z.object({
+		twoColumnSearchResultsRenderer: z.object({
+			primaryContents: z.object({
+				sectionListRenderer: z.object({
+					contents: z.array(
+						z.looseObject({
+							itemSectionRenderer: z
+								.object({
+									contents: z.array(youtubeSearchItemSchema),
+								})
+								.optional(),
+						}),
+					),
+				}),
+			}),
+		}),
+	}),
+});
 
 const searchCache = new Map<
 	string,
 	Promise<FetchResponse<string | undefined>>
 >();
+
+type YouTubeSearchResponse = z.infer<typeof youtubeSearchResponseSchema>;
 
 function cacheSearch(
 	cacheKey: string,
@@ -26,6 +72,45 @@ function cacheSearch(
 	}
 }
 
+interface GetYouTubeSearchUrlParams {
+	channelName: string;
+	title: string;
+}
+
+function getYouTubeSearchUrl({
+	channelName,
+	title,
+}: GetYouTubeSearchUrlParams) {
+	const url = new URL("https://www.youtube.com/results");
+	url.searchParams.set("search_query", `${channelName} ${title}`);
+
+	return url;
+}
+
+async function fetchYouTubeSearchPage(
+	request: SearchYouTubeRequest,
+): Promise<FetchResponse<string>> {
+	try {
+		const response = await fetch(getYouTubeSearchUrl(request).toString());
+
+		if (!response.ok) {
+			return {
+				errorMessage: "Failed to get YouTube search results.",
+				success: false,
+			};
+		}
+
+		return { success: true, value: await response.text() };
+	} catch (error) {
+		console.error(error);
+
+		return {
+			errorMessage: "Failed to get YouTube search results.",
+			success: false,
+		};
+	}
+}
+
 function getSearchCacheKey(request: SearchYouTubeRequest) {
 	return [
 		request.channelId,
@@ -35,19 +120,60 @@ function getSearchCacheKey(request: SearchYouTubeRequest) {
 	].join("\0");
 }
 
-async function getYouTubeResults({
-	channelName,
-	title,
-}: SearchYouTubeRequest): Promise<FetchResponse<SearchItem[]>> {
-	try {
-		const searchResponse = await getListByKeyword(
-			`${channelName} ${title}`,
-			false,
-			20,
-			[{ type: "video" }],
-		);
+function getYouTubeSearchItems(searchResponse: YouTubeSearchResponse) {
+	return (
+		searchResponse.contents.twoColumnSearchResultsRenderer.primaryContents
+			.sectionListRenderer.contents[0]?.itemSectionRenderer?.contents ?? []
+	);
+}
 
-		return { success: true, value: searchResponse.items };
+function parseYouTubeInitialData(responseText: string) {
+	const match = YOUTUBE_INITIAL_DATA_REGEX.exec(responseText);
+
+	if (!match?.[1]) {
+		throw new Error("Could not find ytInitialData.");
+	}
+
+	const parsed: unknown = JSON.parse(match[1]);
+	const searchResponse = youtubeSearchResponseSchema.safeParse(parsed);
+
+	if (!searchResponse.success) {
+		throw searchResponse.error;
+	}
+
+	return searchResponse.data;
+}
+
+function parseYouTubeResults(responseText: string): YouTubeSearchResult[] {
+	const searchResponse = parseYouTubeInitialData(responseText);
+
+	return getYouTubeSearchItems(searchResponse).flatMap((item) => {
+		const video = item.videoRenderer;
+
+		if (!video) {
+			return [];
+		}
+
+		return {
+			channelTitle: video.longBylineText.runs[0]?.text ?? "",
+			id: video.videoId,
+			length: video.lengthText,
+			title: video.title.runs[0]?.text ?? "",
+		};
+	});
+}
+
+async function getYouTubeResults(
+	request: SearchYouTubeRequest,
+): Promise<FetchResponse<YouTubeSearchResult[]>> {
+	const response = await fetchYouTubeSearchPage(request);
+
+	if (!response.success) {
+		return response;
+	}
+
+	try {
+		return { success: true, value: parseYouTubeResults(response.value) };
 	} catch (error) {
 		console.error(error);
 

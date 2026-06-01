@@ -1,5 +1,4 @@
 import { fuzzy } from "fast-fuzzy";
-import type { SearchItem } from "youtube-search-api";
 
 import { cleanString } from "@/utils/tools/string-tools";
 import { parseTimestamp } from "@/utils/tools/time-tools";
@@ -8,17 +7,15 @@ import type { SearchYouTubeRequest } from "@/utils/types/network-requests";
 const EPISODE_MATCH_REGEX = /(?:Episode|Ep|Part)[. ]*?(\d+)/i;
 const TITLE_SEGMENT_SEPARATOR_REGEX = /[|-–—]/;
 
-interface YouTubeLength {
-	simpleText: string;
+interface YouTubeSearchResult {
+	channelTitle: string;
+	id: string;
+	length: YouTubeLength;
+	title: string;
 }
 
-function isYouTubeLength(value: unknown): value is YouTubeLength {
-	return (
-		typeof value === "object" &&
-		value !== null &&
-		"simpleText" in value &&
-		typeof (value as Record<string, unknown>)["simpleText"] === "string"
-	);
+interface YouTubeLength {
+	simpleText: string;
 }
 
 function getChannelScore({ request, result }: GetMatchScoreParams) {
@@ -49,13 +46,7 @@ function getEpisodeNumber(value: string) {
 
 function getLengthScore({ request, result }: GetMatchScoreParams) {
 	const { videoLength } = request;
-	const resultLength: unknown = result.length;
-
-	if (!isYouTubeLength(resultLength)) {
-		return Number.NEGATIVE_INFINITY;
-	}
-
-	const parsedLength = parseTimestamp(resultLength.simpleText);
+	const parsedLength = parseTimestamp(result.length.simpleText);
 	const difference = Math.abs(videoLength - parsedLength);
 
 	if (parsedLength - videoLength > 200) {
@@ -81,7 +72,7 @@ function getTitleSegmentMatches({
 
 interface GetMatchScoreParams {
 	request: SearchYouTubeRequest;
-	result: SearchItem;
+	result: YouTubeSearchResult;
 }
 
 function getMatchScore(params: GetMatchScoreParams) {
@@ -125,15 +116,15 @@ function getMatchScore(params: GetMatchScoreParams) {
 
 interface FindYouTubeMatchParams {
 	request: SearchYouTubeRequest;
-	results: SearchItem[];
+	results: YouTubeSearchResult[];
 }
 
 function findYouTubeMatch({
 	request,
 	results,
-}: FindYouTubeMatchParams): SearchItem | undefined {
+}: FindYouTubeMatchParams): YouTubeSearchResult | undefined {
 	let bestScore = Number.NEGATIVE_INFINITY;
-	let bestMatch: SearchItem | undefined = undefined;
+	let bestMatch: YouTubeSearchResult | undefined = undefined;
 
 	for (const result of results) {
 		const score = getMatchScore({ request, result });
@@ -150,3 +141,4 @@ function findYouTubeMatch({
 }
 
 export { findYouTubeMatch };
+export type { YouTubeSearchResult };
