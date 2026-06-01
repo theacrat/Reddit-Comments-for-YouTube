@@ -1,11 +1,40 @@
 {
-	"extends": [
-		"@tsconfig/recommended/tsconfig.json",
-		"@tsconfig/strictest/tsconfig.json",
-		"@tsconfig/vite-react/tsconfig.json",
-		"./.wxt/tsconfig.json"
-	],
+	"$schema": "https://www.schemastore.org/tsconfig",
+	"extends": "./.wxt/tsconfig.json",
 	"compilerOptions": {
-		"lib": ["ESNext", "DOM", "DOM.Iterable"]
+		"skipLibCheck": true,
+
+		"noEmit": true,
+
+		"erasableSyntaxOnly": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+
+		"jsx": "react-jsx",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"moduleDetection": "force",
+		"target": "esnext",
+		"useDefineForClassFields": true,
+
+		"allowImportingTsExtensions": true,
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"noUncheckedSideEffectImports": true,
+
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strict": true
 	}
 }
