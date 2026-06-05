@@ -230,6 +230,9 @@ async function appendMatchedYouTubeQueries({
 async function dedupeThreads(threads: FetchResponse<Thread[]>[]) {
 	const threadIds = new Set<string>();
 	const communityBlacklist = await getValue(Settings.COMMUNITYBLACKLIST);
+	const lowerCaseCommunityBlacklist = new Set(
+		communityBlacklist.map((community) => community.toLowerCase()),
+	);
 
 	return threads.flatMap((entry) => {
 		if (!entry.success) {
@@ -239,7 +242,7 @@ async function dedupeThreads(threads: FetchResponse<Thread[]>[]) {
 		return entry.value.filter((thread) => {
 			if (
 				threadIds.has(thread.fullId) ||
-				communityBlacklist.includes(thread.community)
+				lowerCaseCommunityBlacklist.has(thread.community.toLowerCase())
 			) {
 				return false;
 			}

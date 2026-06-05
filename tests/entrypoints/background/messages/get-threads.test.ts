@@ -40,6 +40,7 @@ vi.mock("@/utils/settings", () => ({
 
 vi.mock("@/utils/tools/request-tools", () => ({
 	buildLemmyApiUrl: vi.fn(),
+	convertRedditUserVotes: vi.fn(() => 0),
 	getRedditLoginRequiredErrorMessage: getMockRedditLoginRequiredErrorMessage,
 	getStoredLemmyAuthConfig: vi.fn(),
 	requestJson: mockedRequestJson,
@@ -64,6 +65,31 @@ const request: GetThreadsRequest = {
 	url: "video-id",
 	youtubeId: undefined,
 };
+
+interface BuildRedditThreadParams {
+	id: string;
+	subreddit: string;
+}
+
+function buildRedditThread({ id, subreddit }: BuildRedditThreadParams) {
+	return {
+		data: {
+			archived: false,
+			author: "author",
+			created: 1,
+			id,
+			likes: undefined,
+			locked: false,
+			name: `t3_${id}`,
+			num_comments: 1,
+			permalink: `/r/${subreddit}/comments/${id}/thread`,
+			score: 1,
+			subreddit,
+			title: `${subreddit} thread`,
+			url: "https://www.youtube.com/watch?v=video-id",
+		},
+	};
+}
 
 const mockedGetRedditLoginRequiredErrorMessage = vi.mocked(
 	getRedditLoginRequiredErrorMessage,
@@ -115,5 +141,49 @@ describe("getThreads", () => {
 			expect.anything(),
 		);
 		expect(mockedResetUser).toHaveBeenCalledOnce();
+	});
+
+	it("excludes blacklisted communities without matching case", async () => {
+		mockedGetValue.mockImplementation(async (setting) => {
+			await Promise.resolve();
+
+			if (setting === Settings.INCLUDENSFW) {
+				return false;
+			}
+
+			if (setting === Settings.SHOWREDDITRESULTS) {
+				return true;
+			}
+
+			if (setting === Settings.COMMUNITYBLACKLIST) {
+				return ["r/typescript"];
+			}
+
+			return "";
+		});
+		mockedRequestJson.mockResolvedValue({
+			success: true,
+			value: {
+				data: {
+					after: undefined,
+					children: [
+						buildRedditThread({
+							id: "typescript",
+							subreddit: "TypeScript",
+						}),
+						buildRedditThread({ id: "react", subreddit: "React" }),
+					],
+				},
+			},
+		});
+
+		await expect(getThreads(request)).resolves.toMatchObject({
+			success: true,
+			value: [
+				expect.objectContaining({
+					community: "r/React",
+				}),
+			],
+		});
 	});
 });

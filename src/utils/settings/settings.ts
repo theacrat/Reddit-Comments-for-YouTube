@@ -141,14 +141,14 @@ async function addToArray(
 	const stored = await storage.getItem<string[]>(storageKey(name));
 	const current = [...(stored ?? settingDef.defaultValue)];
 
-	if (current.includes(value)) {
-		return i18n.t("duplicateEntry");
-	}
-
 	const result = settingDef.validator(value);
 
 	if (result.errorMessage) {
 		return result.errorMessage;
+	}
+
+	if (current.includes(result.value)) {
+		return i18n.t("duplicateEntry");
 	}
 
 	const nextValue = [...current, result.value];
