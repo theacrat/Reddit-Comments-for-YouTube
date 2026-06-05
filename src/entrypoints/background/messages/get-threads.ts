@@ -8,6 +8,7 @@ import {
 import { Settings, getValue } from "@/utils/settings";
 import {
 	buildLemmyApiUrl,
+	getRedditLoginRequiredErrorMessage,
 	getStoredLemmyAuthConfig,
 	requestJson,
 } from "@/utils/tools/request-tools";
@@ -249,6 +250,21 @@ async function dedupeThreads(threads: FetchResponse<Thread[]>[]) {
 	});
 }
 
+function getThreadErrorMessage(threads: FetchResponse<Thread[]>[]) {
+	const redditLoginRequiredErrorMessage = getRedditLoginRequiredErrorMessage();
+
+	for (const threadResponse of threads) {
+		if (
+			!threadResponse.success &&
+			threadResponse.errorMessage === redditLoginRequiredErrorMessage
+		) {
+			return threadResponse.errorMessage;
+		}
+	}
+
+	return i18n.t("threadError");
+}
+
 async function getThreads(
 	request: GetThreadsRequest,
 ): Promise<FetchResponse<Thread[]>> {
@@ -288,7 +304,7 @@ async function getThreads(
 	);
 
 	if (!threads.some((threadResponse) => threadResponse.success)) {
-		return { errorMessage: i18n.t("threadError"), success: false };
+		return { errorMessage: getThreadErrorMessage(threads), success: false };
 	}
 
 	const response = await dedupeThreads(threads);

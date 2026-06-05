@@ -83,6 +83,18 @@ function getRequestErrorMessage(error: unknown) {
 	return error instanceof Error ? error.message : "Unknown request error";
 }
 
+function getRedditLoginRequiredErrorMessage() {
+	return i18n.t("redditLoginRequiredError");
+}
+
+function getResponseErrorMessage(url: string, response: Response) {
+	if (new URL(url).hostname === "api.reddit.com" && response.status === 403) {
+		return getRedditLoginRequiredErrorMessage();
+	}
+
+	return `${response.status} ${response.statusText}`;
+}
+
 function getRequestBody(data: RequestConfig["data"]): BodyInit | undefined {
 	if (data === undefined) {
 		return;
@@ -152,7 +164,7 @@ async function requestCatch(
 
 		if (!response.ok) {
 			return {
-				errorMessage: `${response.status} ${response.statusText}`,
+				errorMessage: getResponseErrorMessage(url.toString(), response),
 				success: false,
 			};
 		}
@@ -216,6 +228,7 @@ export {
 	buildLemmyUrl,
 	convertRedditUserVotes,
 	getLemmyAuthHeaders,
+	getRedditLoginRequiredErrorMessage,
 	getStoredLemmyAuthConfig,
 	requestCatch,
 	requestJson,

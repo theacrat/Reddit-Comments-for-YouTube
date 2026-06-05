@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { browser } from "wxt/browser";
 import { z } from "zod";
 
 import { Settings, getValue } from "@/utils/settings";
@@ -26,6 +27,7 @@ vi.mock("@/utils/settings", () => ({
 }));
 
 const mockedGetValue = vi.mocked(getValue);
+const redditLoginRequiredErrorMessage = "translated reddit login message";
 
 async function getMockSetting(name: Settings) {
 	await Promise.resolve();
@@ -47,6 +49,9 @@ beforeEach(() => {
 
 	vi.stubGlobal("fetch", mockedFetch);
 	vi.stubGlobal("navigator", { onLine: true });
+	vi.spyOn(browser.i18n, "getMessage").mockImplementation((key: string) =>
+		key === "redditLoginRequiredError" ? redditLoginRequiredErrorMessage : "",
+	);
 });
 
 function getFirstFetchOptions() {
@@ -203,6 +208,22 @@ describe("requestJson", () => {
 			requestJson("https://example.test/api"),
 		).resolves.toStrictEqual({
 			errorMessage: "429 Too Many Requests",
+			success: false,
+		});
+	});
+
+	it("suggests logging in for Reddit forbidden responses", async () => {
+		mockedFetch.mockResolvedValueOnce(
+			new Response("", {
+				status: 403,
+				statusText: "Forbidden",
+			}),
+		);
+
+		await expect(
+			requestJson("https://api.reddit.com/comments/thread-id"),
+		).resolves.toStrictEqual({
+			errorMessage: redditLoginRequiredErrorMessage,
 			success: false,
 		});
 	});

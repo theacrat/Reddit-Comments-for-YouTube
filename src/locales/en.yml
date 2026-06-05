@@ -19,6 +19,7 @@ threadCount:
 error: Error
 internetError: Internet connection error. Please check your connection and reload the page.
 otherError: Unknown error loading Reddit content. It is possible that Reddit is down or something in the extension went wrong.
+redditLoginRequiredError: 403 Forbidden. Try logging in to Reddit, then reload this page.
 threadError: Couldn't get threads.
 tagline:
   submitted: submitted
