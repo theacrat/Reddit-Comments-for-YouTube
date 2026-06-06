@@ -28,7 +28,7 @@ function createSearchItem(
 	};
 }
 
-function createYouTubeSearchPage(items: YouTubeSearchResult[]) {
+function createYouTubeSearchPage(items: Partial<YouTubeSearchResult>[]) {
 	return `<html><body><script>var ytInitialData = ${JSON.stringify({
 		contents: {
 			twoColumnSearchResultsRenderer: {
@@ -124,6 +124,33 @@ describe("searchYouTube", () => {
 		expect(mockedFetch).toHaveBeenCalledWith(
 			"https://www.youtube.com/results?search_query=Example+Channel+Episode+12+-+A+Useful+Title",
 		);
+	});
+
+	it("excludes invalid videos from YouTube search results", async () => {
+		const request = {
+			...baseRequest,
+			title: "Episode 12 - Invalid Video Test",
+		};
+		mockedFetch.mockResolvedValue(
+			new Response(
+				createYouTubeSearchPage([
+					{
+						channelTitle: "Example Channel",
+						id: "livestream",
+						title: request.title,
+					},
+					createSearchItem({
+						id: "valid-video",
+						title: request.title,
+					}),
+				]),
+			),
+		);
+
+		await expect(searchYouTube(request)).resolves.toStrictEqual({
+			success: true,
+			value: "valid-video",
+		});
 	});
 
 	it("caches identical searches", async () => {

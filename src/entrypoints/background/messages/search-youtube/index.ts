@@ -39,7 +39,7 @@ const youtubeSearchResponseSchema = z.object({
 						z.looseObject({
 							itemSectionRenderer: z
 								.object({
-									contents: z.array(youtubeSearchItemSchema),
+									contents: z.array(z.unknown()),
 								})
 								.optional(),
 						}),
@@ -148,11 +148,13 @@ function parseYouTubeResults(responseText: string): YouTubeSearchResult[] {
 	const searchResponse = parseYouTubeInitialData(responseText);
 
 	return getYouTubeSearchItems(searchResponse).flatMap((item) => {
-		const video = item.videoRenderer;
+		const searchItem = youtubeSearchItemSchema.safeParse(item);
 
-		if (!video) {
+		if (!searchItem.success || !searchItem.data.videoRenderer) {
 			return [];
 		}
+
+		const { videoRenderer: video } = searchItem.data;
 
 		return {
 			channelTitle: video.longBylineText.runs[0]?.text ?? "",
