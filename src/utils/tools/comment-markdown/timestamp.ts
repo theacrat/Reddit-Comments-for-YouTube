@@ -67,30 +67,6 @@ function readColonTimestamp(src: string, pos: number) {
 	return src.slice(pos, end);
 }
 
-function readUnitTimestamp(src: string, pos: number) {
-	let end = pos;
-	let foundUnit = false;
-
-	while (end < src.length) {
-		const digits = readWhile(src, end, (char) => /\d/.test(char));
-
-		if (!digits) {
-			break;
-		}
-
-		const unit = src[end + digits.length];
-
-		if (unit !== "h" && unit !== "m" && unit !== "s") {
-			break;
-		}
-
-		foundUnit = true;
-		end += digits.length + 1;
-	}
-
-	return foundUnit ? src.slice(pos, end) : undefined;
-}
-
 function parseTimestampToken(
 	src: string,
 	pos: number,
@@ -99,7 +75,7 @@ function parseTimestampToken(
 		return undefined;
 	}
 
-	const text = readColonTimestamp(src, pos) ?? readUnitTimestamp(src, pos);
+	const text = readColonTimestamp(src, pos);
 
 	if (!text || !hasTextBoundaryAfter(src, pos + text.length)) {
 		return undefined;
