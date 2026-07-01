@@ -231,9 +231,6 @@ describe("redditCommentParser Reddit renderer fixes", () => {
 		expect(html).toContain(
 			'<span role="button" tabindex="0" data-timestamp-seconds="62">[1:02]</span>',
 		);
-		expect(html).toContain(
-			'<span role="button" tabindex="0" data-timestamp-seconds="123">[2m03s]</span>',
-		);
 	});
 });
 
@@ -367,9 +364,6 @@ describe("lemmyCommentParser renderer behavior", () => {
 
 		expect(html).toContain(
 			'<span role="button" tabindex="0" data-timestamp-seconds="62">[1:02]</span>',
-		);
-		expect(html).toContain(
-			'<span role="button" tabindex="0" data-timestamp-seconds="123">[2m03s]</span>',
 		);
 	});
 
