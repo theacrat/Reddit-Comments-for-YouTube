@@ -32,7 +32,7 @@ const Sites: Site[] = [
 		videoElement: ".video-stream",
 	},
 	{
-		anchorElement: "[aria-label='video details'] section[aria-labelledby]",
+		anchorElement: "[aria-label='video details'] section[aria-label]:has(time)",
 		anchorType: "afterend",
 		canMatchYouTube: true,
 		domains: ["nebula.tv"],
